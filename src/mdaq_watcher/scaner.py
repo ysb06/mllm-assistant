@@ -102,19 +102,25 @@ class ClusterGatewayFilter:
         right_signal,
         set_num,
     ) -> None:
-        # print(f"Received data:")
-        # for idx, dat in enumerate(float_values):
-        #     print(f"Float [{idx}]:", dat)
-        # for idx, dat in enumerate(int_values):
-        #     print(f"Int [{idx}]:", dat)
-        print("Values:")
-        print(f"RPM: {rpm}")
-        print(f"Temp: {temp}")
-        print(f"Speed: {speed}")
-        print(f"Fuel: {fuel}")
-        print(f"Incident: {incident}")
-        print(f"Sagat: {sagat}")
-        print(f"Left Signal: {left_signal}")
-        print(f"Right Signal: {right_signal}")
-        print(f"Set Num: {set_num}")
-        # raise NotImplementedError("This method should be implemented in a subclass.")
+        # print(f"RPM: {rpm}")
+        # print(f"Temp: {temp}")
+        # print(f"Speed: {speed}")
+        # print(f"Fuel: {fuel}")
+        # print(f"Incident: {incident}")
+        # print(f"Sagat: {sagat}")
+        # print(f"Left Signal: {left_signal}")
+        # print(f"Right Signal: {right_signal}")
+        # print(f"Set Num: {set_num}")
+        
+        # ------- Example output:
+        # RPM: 745.3675537109375
+        # Temp: 50.0
+        # Speed: 5.609803199768066
+        # Fuel: 50.0
+        # Incident: inf
+        # Sagat: inf
+        # Left Signal: 0.0
+        # Right Signal: 0.0
+        # Set Num: 1.0
+
+        raise NotImplementedError("This method should be implemented in a subclass.")
