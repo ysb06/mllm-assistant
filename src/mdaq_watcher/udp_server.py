@@ -3,6 +3,7 @@ import struct
 from typing import Optional
 import threading
 import time
+import mdaq_watcher.scaner as scaner
 
 MDAQ_SERVER_IP = "192.168.1.2"
 MDAQ_SERVER_PORT = 3232
@@ -12,7 +13,13 @@ FLOAT_SIZE = 9
 
 
 def open_server():
-    pass
+    with scaner.ClusterGatewayFilter() as scaner_client:
+        while True:
+            try:
+                time.sleep(0.25)
+            except KeyboardInterrupt:
+                print("Exiting...")
+                break
 
 
 if __name__ == "__main__":
