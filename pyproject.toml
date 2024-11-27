@@ -1,0 +1,19 @@
+[project]
+name = "mdaq-watcher"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "sbyim", email = "ysb06@hotmail.com"},
+]
+dependencies = []
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.pdm]
+distribution = true
