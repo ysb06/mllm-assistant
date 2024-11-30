@@ -1,0 +1,24 @@
+[data-component='SessionManager'] {
+  padding: 16px;
+  background-color: #eef2f5;
+  border-bottom: 1px solid #ccc;
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.2em;
+  }
+
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+
+    li {
+      margin-bottom: 8px;
+
+      strong {
+        display: inline-block;
+        width: 120px;
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "mllm-server"
+		},
+		{
+			"path": "mllm-client"
+		}
+	],
+	"settings": {}
+}

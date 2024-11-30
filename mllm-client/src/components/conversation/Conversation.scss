@@ -1,0 +1,19 @@
+[data-component='Conversation'] {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    margin-right: 8px;
+  
+    input {
+      flex: 1;
+      padding: 8px;
+      font-size: 1em;
+      margin-right: 8px;
+    }
+  
+    button {
+      padding: 8px 16px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  }
