@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "mllm-server"
+			"path": "mllm-client"
 		},
 		{
-			"path": "mllm-client"
+			"path": "mllm-sensor-server"
 		}
 	],
 	"settings": {}
