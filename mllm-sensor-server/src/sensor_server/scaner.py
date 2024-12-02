@@ -1,3 +1,4 @@
+import logging
 import socket
 import struct
 from typing import List, Optional, Tuple
@@ -7,9 +8,11 @@ import time
 from sensor_server.server import SERVER_IP
 from .server import SensorServer
 
-SCANER_SERVER_IP = "192.168.0.100"
-SCANER_SERVER_PORT = 65002
+SCANER_SERVER_IP = "192.168.1.6"
+SCANER_SERVER_PORT = 46012
 DATA_VALUE_SIZE = 8  # 32-bit float
+
+logger = logging.getLogger(__name__)
 
 
 class ScanerFilterServer(SensorServer):
@@ -20,10 +23,40 @@ class ScanerFilterServer(SensorServer):
         data_size: int = DATA_VALUE_SIZE,
     ) -> None:
         super().__init__()
-        self.filter_address = (filter_ip, filter_port)
+        logger.info(f"ScanerFilterServer: {filter_ip}:{filter_port}")
         self.data_size = data_size
 
-        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.filter_thread: Optional[threading.Thread] = None
+        self.filter_udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.filter_address = (filter_ip, filter_port)
+        self.current_scaner_data: List[float] = []
+
+    def _process_client_request(self, data: bytes) -> bytes:
+        return data
+
+    def _update_scaner_data(self) -> None:
+        print("Updating scaner data...")
+        while self.is_active:
+            try:
+                data, _ = self.filter_udp_socket.recvfrom(self.buffer_size)
+                print(f"Received data: {data.hex()}")
+            except socket.timeout:
+                print("(Timeout) Waiting for messages...")
+                continue
+            except OSError as e:
+                print(f"The socket may be forcibly closed: {e}")
+
+    def activate(self):
+        super().activate()
+        self.filter_udp_socket.bind(self.filter_address)
+        self.filter_thread = threading.Thread(target=self._update_scaner_data)
+        self.filter_thread.start()
+        
+
+    def deactivate(self):
+        super().deactivate()
+        self.filter_udp_socket.close()
+        self.filter_thread.join()
 
 
 class UdpFilterServer:
@@ -99,3 +132,16 @@ class UdpFilterServer:
         self.udp_socket.close()
         self.udp_thread.join()
         print("Deactivating complete!")
+
+
+def activate_server():
+    with ScanerFilterServer() as server:
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("KeyboardInterrupt: Stopping the server...")
+
+
+if __name__ == "__main__":
+    activate_server()
