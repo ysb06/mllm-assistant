@@ -8,7 +8,7 @@
             "name": "Run UDP Server",
             "type": "debugpy",
             "request": "launch",
-            "module": "mdaq_watcher",
+            "module": "sensor_server",
             "console": "integratedTerminal"
         },
         {

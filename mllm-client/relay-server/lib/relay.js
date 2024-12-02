@@ -1,18 +1,35 @@
 import { WebSocketServer } from 'ws';
 import { RealtimeClient } from '@openai/realtime-api-beta';
-import dgram from 'dgram';
+import net from 'net';
+
+const SERVER_ADDRESS = "localhost"
+const SERVER_PORT = 46011
 
 export class RealtimeRelay {
   constructor(apiKey) {
-    const MDAQ_SERVER_ADDRESS = "192.168.0.2"
-    const MDAQ_SERVER_PORT = 3233
-
     this.apiKey = apiKey;
     this.sockets = new WeakMap();
     this.wss = null;
 
-    this.mdaqSocket = dgram.createSocket('udp4');
-    
+    this.sensorSocket = new net.Socket();
+    this.sensorSocket.connect(SERVER_PORT, SERVER_ADDRESS, () => {
+      this.log('Connected to Sensor Server');
+    });
+    this.getSensorData = this.getSensorData.bind(this);
+  }
+
+  getSensorData() {
+    return new Promise((resolve, reject) => {
+      this.sensorSocket.write('GET\n');
+      this.sensorSocket.on('data', (data) => {
+        resolve(data.toString());
+      });
+
+      this.sensorSocket.on('error', (err) => {
+        console.error('에러가 발생했습니다:', err);
+        reject(err);
+      });
+    });
   }
 
   listen(port) {
@@ -51,10 +68,17 @@ export class RealtimeRelay {
     // Relay: Browser Event -> OpenAI Realtime API Event
     // We need to queue data waiting for the OpenAI connection
     const messageQueue = [];
-    const messageHandler = (data) => {
+    const messageHandler = async (data) => {
       try {
         const event = JSON.parse(data);
-        this.log(`Relaying "${event.type}" to OpenAI`);
+        this.log(`Relaying "${event}" to OpenAI`);
+        const result = await this.getSensorData();
+        if (Object.keys(event).includes('item')) {
+          if (event.item.role === 'user') {
+            event.item.content[0].text += "\n- Vehicle State:\n" + result;
+            console.log(event.item.content);
+          }
+        }
         client.realtime.send(event.type, event);
       } catch (e) {
         console.error(e.message);

@@ -23,7 +23,7 @@ export function SessionManager({ sessionInfo }: SessionManagerProps) {
           <strong>Start Time:</strong> {sessionInfo.startTime}
         </li>
         <li>
-          <strong>Target URL:</strong> {sessionInfo.sessionId}
+          <strong>Server URL:</strong> {sessionInfo.sessionId}
         </li>
       </ul>
     </div>

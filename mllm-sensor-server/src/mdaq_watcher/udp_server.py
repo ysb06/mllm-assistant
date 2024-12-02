@@ -3,7 +3,7 @@ import struct
 from typing import Optional
 import threading
 import time
-import mdaq_watcher.scaner as scaner
+import mdaq_watcher.mdaq as mdaq
 
 MDAQ_SERVER_IP = "192.168.1.2"
 MDAQ_SERVER_PORT = 3232
@@ -13,7 +13,7 @@ FLOAT_SIZE = 9
 
 
 def open_server():
-    with scaner.ClusterGatewayFilter() as scaner_client:
+    with mdaq.MdaqClient() as mdaq_client:
         while True:
             try:
                 time.sleep(0.25)
