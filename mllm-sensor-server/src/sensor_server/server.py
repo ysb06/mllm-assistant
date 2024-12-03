@@ -4,13 +4,14 @@ import time
 from typing import List, Optional
 
 SERVER_IP = "localhost"
+SERVER_PORT = 46011
 DATA_VALUE_SIZE = 8  # 32-bit float
 
 class SensorServer:
     def __init__(
         self,
         ip_address: str = SERVER_IP,
-        port: int = 46011,
+        port: int = SERVER_PORT,
         buffer_size=1024,
         update_interval=0.25,
     ) -> None:

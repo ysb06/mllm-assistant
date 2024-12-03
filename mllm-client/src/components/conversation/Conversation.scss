@@ -1,19 +1,148 @@
 [data-component='Conversation'] {
+  .content-block {
+    position: relative;
     display: flex;
-    flex-grow: 1;
-    align-items: center;
-    margin-right: 8px;
-  
-    input {
-      flex: 1;
-      padding: 8px;
-      font-size: 1em;
-      margin-right: 8px;
+    flex-direction: column;
+    max-height: 100%;
+    width: 100%;
+
+    .content-block-title {
+      flex-shrink: 0;
+      padding-top: 16px;
+      padding-bottom: 4px;
+      position: relative;
     }
-  
-    button {
-      padding: 8px 16px;
-      font-size: 1em;
-      cursor: pointer;
+
+    .content-block-body {
+      color: #6e6e7f;
+      position: relative;
+      flex-grow: 1;
+      padding: 8px 0px;
+      padding-top: 4px;
+      line-height: 1.2em;
+      overflow: auto;
+
+      &.full {
+        padding: 0px;
+      }
     }
   }
+
+  .content-logs {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &>div {
+      flex-grow: 1;
+    }
+
+    &>.content-actions {
+      flex-grow: 0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      bottom: 0;
+      width: 100%;
+    }
+
+    &>div.events {
+      overflow: scroll;
+    }
+
+    .events {
+      border-top: 1px solid #e7e7e7;
+      flex-grow: 2;
+      overflow: scroll;
+    }
+
+    .conversation {
+      display: flex;
+      flex-grow: 3;
+      width: 100%;
+      overflow: hidden;
+      min-height: 0;
+      border-top: 1px solid #e7e7e7;
+    }
+  }
+}
+
+.conversation-item {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  &:not(:hover) .close {
+    display: none;
+  }
+
+  .close {
+    position: absolute;
+    top: 0px;
+    right: -20px;
+    background: #aaa;
+    color: #fff;
+    display: flex;
+    border-radius: 16px;
+    padding: 2px;
+    cursor: pointer;
+
+    &:hover {
+      background: #696969;
+    }
+
+    svg {
+      stroke-width: 3;
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .speaker {
+    position: relative;
+    text-align: left;
+    gap: 16px;
+    width: 80px;
+    flex-shrink: 0;
+    margin-right: 16px;
+
+    &.user {
+      color: #0099ff;
+    }
+
+    &.assistant {
+      color: #009900;
+    }
+  }
+
+  .speaker-content {
+    color: #18181b;
+    overflow: hidden;
+    word-wrap: break-word;
+  }
+}
+
+[data-component='ConversationInput'] {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  margin-right: 8px;
+
+  input {
+    flex: 1;
+    padding: 8px;
+    font-size: 1em;
+    margin-right: 8px;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 1em;
+    cursor: pointer;
+  }
+}

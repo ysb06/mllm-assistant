@@ -9,7 +9,7 @@ from collections import deque
 from sensor_server.server import SERVER_IP
 from .server import SensorServer
 
-SCANER_SERVER_IP = "192.168.0.100"
+SCANER_SERVER_IP = "192.168.1.6"
 SCANER_SERVER_PORT = 46012
 DATA_VALUE_SIZE = 8  # 32-bit float
 
@@ -46,8 +46,12 @@ class ScanerFilterServer(SensorServer):
                 key = -1
                 for idx, value in enumerate(values):
                     if idx % 2 == 0:
+                        if value == float("inf") or value == float("-inf"):
+                            key = -1
                         key = int(value)
                     else:
+                        if key == -1:
+                            continue
                         results[key] = value
                 self._process_scaner_data(results)
             except socket.timeout:
@@ -57,13 +61,15 @@ class ScanerFilterServer(SensorServer):
                 print(f"The socket may be forcibly closed: {e}")
 
     def _process_client_request(self, _: bytes) -> bytes:
-        result = ""
-        result += f"[Steering Angles]:{list(self._scaner_steering_angles)}\n"
-        result += f"[Velocities]:{list(self._scaner_speeds)}\n"
+        result = f"[Steering Angles]:{list(self._scaner_steering_angles)}"
+        result += f"[Velocities]:{list(self._scaner_speeds)}"
         
+        print("Sending scaner data...:", result)
         return result.encode()
     
     def _process_scaner_data(self, data: Dict[int, float]) -> bytes:
+        if 167 not in data or 120 not in data:
+            return
         self._scaner_steering_angles.append(data[167])  # 167: Steering Angle
         self._scaner_speeds.append(data[120])           # 120: Speed
     

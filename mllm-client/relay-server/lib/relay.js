@@ -16,20 +16,43 @@ export class RealtimeRelay {
       this.log('Connected to Sensor Server');
     });
     this.getSensorData = this.getSensorData.bind(this);
+    this.getSensorDataInstructions = this.getSensorDataInstructions.bind(this);
   }
 
   getSensorData() {
     return new Promise((resolve, reject) => {
+      console.log('GETTING SENSOR DATA');
       this.sensorSocket.write('GET\n');
-      this.sensorSocket.on('data', (data) => {
-        resolve(data.toString());
-      });
 
-      this.sensorSocket.on('error', (err) => {
+      const onData = (data) => {
+        console.log('DATA RECEIVED');
+        resolve(data.toString());
+      };
+
+      const onError = (err) => {
         console.error('에러가 발생했습니다:', err);
         reject(err);
-      });
+      };
+
+      this.sensorSocket.once('data', onData);
+      this.sensorSocket.once('error', onError);
     });
+  }
+
+  async getSensorDataInstructions(instructions) {
+    let newInstructions = "";
+    const lines = instructions.split('\n');
+    for (const line of lines) {
+      if (line.startsWith("- Please refer to the following current vehicle state when providing answers or questions:")) {
+        newInstructions += "- Please refer to the following current vehicle state when providing answers or questions:";
+        const sensorData = await this.getSensorData();
+        newInstructions += sensorData + '\n';
+      } else {
+        newInstructions += line + '\n';
+      }
+    }
+
+    return newInstructions;
   }
 
   listen(port) {
@@ -61,6 +84,8 @@ export class RealtimeRelay {
     // Relay: OpenAI Realtime API Event -> Browser Event
     client.realtime.on('server.*', (event) => {
       this.log(`Relaying "${event.type}" to Client`);
+      if (event.type.includes(".delta") == false)
+        console.log(event);
       ws.send(JSON.stringify(event));
     });
     client.realtime.on('close', () => ws.close());
@@ -71,14 +96,23 @@ export class RealtimeRelay {
     const messageHandler = async (data) => {
       try {
         const event = JSON.parse(data);
-        this.log(`Relaying "${event}" to OpenAI`);
-        const result = await this.getSensorData();
-        if (Object.keys(event).includes('item')) {
-          if (event.item.role === 'user') {
-            event.item.content[0].text += "\n- Vehicle State:\n" + result;
-            console.log(event.item.content);
-          }
+        this.log(`Relaying "${event.type}" to OpenAI`);
+        if (event.type === 'session.update') {
+          client.updateSession(event.session);
         }
+        // else if (event.type === 'input_audio_buffer.append' || event.type === 'conversation.item.create') {
+        //   await client.waitForSessionCreated();
+        //   const instructions = await this.getSensorDataInstructions(client.sessionConfig.instructions);
+        //   client.updateSession({ instructions: instructions });
+        // }
+
+
+        // if (Object.keys(event).includes('item')) {
+        //   if (event.item.role === 'user') {
+        //     event.item.content[0].text += "\n- Current vehicle state:\n" + result;
+        //   }
+        // }
+
         client.realtime.send(event.type, event);
       } catch (e) {
         console.error(e.message);
