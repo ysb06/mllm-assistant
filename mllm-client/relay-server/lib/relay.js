@@ -21,11 +21,9 @@ export class RealtimeRelay {
 
   getSensorData() {
     return new Promise((resolve, reject) => {
-      console.log('GETTING SENSOR DATA');
       this.sensorSocket.write('GET\n');
 
       const onData = (data) => {
-        console.log('DATA RECEIVED');
         resolve(data.toString());
       };
 
@@ -43,8 +41,8 @@ export class RealtimeRelay {
     let newInstructions = "";
     const lines = instructions.split('\n');
     for (const line of lines) {
-      if (line.startsWith("- Please refer to the following current vehicle state when providing answers or questions:")) {
-        newInstructions += "- Please refer to the following current vehicle state when providing answers or questions:";
+      if (line.startsWith("- Please consider the following current vehicle state when providing answers or questions:")) {
+        newInstructions += "- Please consider the following current vehicle state when providing answers or questions:";
         const sensorData = await this.getSensorData();
         newInstructions += sensorData + '\n';
       } else {
@@ -81,44 +79,65 @@ export class RealtimeRelay {
     this.log(`Connecting with key "${this.apiKey.slice(0, 3)}..."`);
     const client = new RealtimeClient({ apiKey: this.apiKey });
 
+    // -------------------------------------------------
     // Relay: OpenAI Realtime API Event -> Browser Event
-    client.realtime.on('server.*', (event) => {
+    client.realtime.on('server.*', async (event) => {
       this.log(`Relaying "${event.type}" to Client`);
-      if (event.type.includes(".delta") == false)
+
+      // Intercept Events
+      if (event.type === 'session.created' || event.type === 'session.updated') {
         console.log(event);
+      }
+      // else if (event.type.includes(".delta") == false)
+      //   console.log(event);
+      // 동작하지 않음
+      // else if (event.type === 'input_audio_buffer.speech_stopped') {
+      //   const newInstructions = await this.getSensorDataInstructions(client.sessionConfig.instructions);
+      //   client.updateSession({ instructions: newInstructions });
+      // }
+      
+
       ws.send(JSON.stringify(event));
     });
     client.realtime.on('close', () => ws.close());
 
+    // -------------------------------------------------
     // Relay: Browser Event -> OpenAI Realtime API Event
-    // We need to queue data waiting for the OpenAI connection
     const messageQueue = [];
     const messageHandler = async (data) => {
       try {
         const event = JSON.parse(data);
         this.log(`Relaying "${event.type}" to OpenAI`);
+
+        // Intercept Events
         if (event.type === 'session.update') {
           client.updateSession(event.session);
         }
-        // else if (event.type === 'input_audio_buffer.append' || event.type === 'conversation.item.create') {
-        //   await client.waitForSessionCreated();
-        //   const instructions = await this.getSensorDataInstructions(client.sessionConfig.instructions);
-        //   client.updateSession({ instructions: instructions });
+        else if (event.type === 'context.update') {
+          const contextText = await this.getSensorData();
+          const contextUpdatePrompt = "이전 차량 상태는 무시하세요. 아래는 현재 차량 상태이며, 이후 제 질문에 답변할 때 이 차량 상태를 반드시 고려해야 합니다. 단, 이번 요청에 대한 답변은 ‘말씀하세요’라고만 해주세요:"
+          const query = contextUpdatePrompt + contextText;
+          client.sendUserMessageContent([
+            {
+              type: 'input_text',
+              text: query,
+            },
+          ]);
+        }
+        // 동작하지 않음
+        // else if (event.type === 'input_audio_buffer.commit') {
+        //   const newInstructions = await this.getSensorDataInstructions(client.sessionConfig.instructions);
+        //   client.updateSession({ instructions: newInstructions });
         // }
-
-
-        // if (Object.keys(event).includes('item')) {
-        //   if (event.item.role === 'user') {
-        //     event.item.content[0].text += "\n- Current vehicle state:\n" + result;
-        //   }
-        // }
-
-        client.realtime.send(event.type, event);
+        else {
+          client.realtime.send(event.type, event);
+        }
       } catch (e) {
         console.error(e.message);
         this.log(`Error parsing event from client: ${data}`);
       }
     };
+    // We need to queue data waiting for the OpenAI connection
     ws.on('message', (data) => {
       if (!client.isConnected()) {
         messageQueue.push(data);

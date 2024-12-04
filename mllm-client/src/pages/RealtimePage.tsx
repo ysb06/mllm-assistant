@@ -51,8 +51,11 @@ export function RealtimePage() {
             <header>
                 <RealtimePageTitle />
             </header>
-            <SessionManager sessionInfo={sessionInfo} />
-            <Conversation items={items} onDeleteItem={deleteConversationItem} />
+            <main>
+                <SessionManager sessionInfo={sessionInfo} />
+                <Conversation items={items} onDeleteItem={deleteConversationItem} />
+            </main>
+
         </div>
     )
 }

@@ -12,7 +12,7 @@ class SensorServer:
         self,
         ip_address: str = SERVER_IP,
         port: int = SERVER_PORT,
-        buffer_size=1024,
+        buffer_size=2048,
         update_interval=0.25,
     ) -> None:
         self.tcp_socket: Optional[socket.socket] = None

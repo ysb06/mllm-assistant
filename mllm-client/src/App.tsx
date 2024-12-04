@@ -8,8 +8,8 @@ function App() {
     <div data-component="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<RealtimePage />} />
-          <Route path="/console" element={<ConsolePage />} />
+          <Route path="/" element={<ConsolePage />} />
+          <Route path="/console" element={<RealtimePage />} />
         </Routes>
       </BrowserRouter>
     </div>

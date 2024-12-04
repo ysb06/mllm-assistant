@@ -91,6 +91,7 @@ export function ConsolePage() {
     )
   );
 
+
   /**
    * References for
    * - Rendering audio visualization (canvas)
@@ -179,19 +180,20 @@ export function ConsolePage() {
     await client.connect();
 
     // Initialize Prompt as System Role
-    client.realtime.send('conversation.item.create', {
-      item: {
-        type: 'message',
-        role: 'system',
-        content: [
-          {
-            type: 'input_text',
-            text: "You are in a vehicle that the user is currently driving. The user will ask questions and make requests related to operating the vehicle, along with information about the vehicle and its surroundings. Consider all provided information, prioritize the user's safety above all else when responding, and reply in Korean.",
-          },
-        ]
-      },
-    });
-    client.createResponse();
+    // System Role을 사용할 경우 세션 설정을 완전히 무시하는 것처럼 보임
+    // client.realtime.send('conversation.item.create', {
+    //   item: {
+    //     type: 'message',
+    //     role: 'system',
+    //     content: [
+    //       {
+    //         type: 'input_text',
+    //         text: "You are in a vehicle that the user is currently driving. The user will ask questions and make requests related to operating the vehicle, along with information about the vehicle and its surroundings. Consider all provided information, prioritize the user's safety above all else when responding, and reply in Korean.",
+    //       },
+    //     ]
+    //   },
+    // });
+    // client.createResponse();
     // client.sendUserMessageContent([
     //   {
     //     type: `input_text`,
@@ -199,6 +201,12 @@ export function ConsolePage() {
     //     // text: `For testing purposes, I want you to list ten car brands. Number each item, e.g. "one (or whatever number you are one): the item name".`
     //   },
     // ]);
+    client.sendUserMessageContent([
+      {
+        type: `input_text`,
+        text: `You are in a vehicle that I drive. I will ask questions and make requests related to operating the vehicle, along with information about the vehicle and its surroundings. Consider all provided information, prioritize my safety above all else when responding, and reply in Korean.`,
+      },
+    ]);
 
     if (client.getTurnDetectionType() === 'server_vad') {
       await wavRecorder.record((data) => client.appendInputAudio(data.mono));
@@ -235,6 +243,28 @@ export function ConsolePage() {
   }, []);
 
   /**
+   * response.create 확장 기능
+   */
+  const createResponse = async (customInstructions: string) => {
+    const client = clientRef.current;
+    if (
+      client.getTurnDetectionType() === null && client.inputAudioBuffer.byteLength > 0
+    ) {
+      client.realtime.send('input_audio_buffer.commit', {});
+      client.conversation.queueInputAudio(client.inputAudioBuffer);
+      client.inputAudioBuffer = new Int16Array(0);
+    }
+    client.realtime.send('response.create', {
+      response: {
+        modalities: ["text", "audio"],
+        instructions: customInstructions,
+        voice: "alloy",
+        output_audio_format: "pcm16",
+      },
+    });
+  };
+
+  /**
    * In push-to-talk mode, start recording
    * .appendInputAudio() for each sample
    */
@@ -248,6 +278,8 @@ export function ConsolePage() {
       const { trackId, offset } = trackSampleOffset;
       await client.cancelResponse(trackId, offset);
     }
+    // 가짜 이벤트 발생, relay서버가 없으면 에러가 발생함
+    client.realtime.send('context.update', {});
     await wavRecorder.record((data) => client.appendInputAudio(data.mono));
   };
 
@@ -260,6 +292,7 @@ export function ConsolePage() {
     const wavRecorder = wavRecorderRef.current;
     await wavRecorder.pause();
     client.createResponse();
+    // createResponse("Test");
   };
 
   /**

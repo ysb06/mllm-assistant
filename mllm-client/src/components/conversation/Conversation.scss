@@ -1,4 +1,6 @@
 [data-component='Conversation'] {
+  overflow: scroll;
+  
   .content-block {
     position: relative;
     display: flex;
