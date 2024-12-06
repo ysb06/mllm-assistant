@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "mllm-sensor-server"
+		},
+		{
+			"path": "vision-assistant-for-driving"
 		}
 	],
 	"settings": {}
