@@ -88,6 +88,11 @@ export class RealtimeRelay {
       if (event.type === 'session.created' || event.type === 'session.updated') {
         console.log(event);
       }
+      if (event.type === 'response.done') {
+        if (event.response.status === "failed") {
+          console.log(event.response.status_details);
+        }
+      }
       // else if (event.type.includes(".delta") == false)
       //   console.log(event);
       // 동작하지 않음

@@ -5,14 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run UDP Server",
+            "name": "Run Security Project",
             "type": "debugpy",
             "request": "launch",
-            "module": "sensor_server",
+            // "module": "mllm_security",
+            "program": "src/mllm_security/attack.py",
             "console": "integratedTerminal"
         },
         {
-            "name": "Python Debugger: Current File in Sensor Server",
+            "name": "Python Debugger: Current File in Security Project",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",

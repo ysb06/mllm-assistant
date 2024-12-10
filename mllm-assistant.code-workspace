@@ -1,13 +1,24 @@
 {
 	"folders": [
 		{
+			"name": "mllm-assistant",
+			"path": "."
+		},
+		{
+			"name": "mllm-client",
 			"path": "mllm-client"
 		},
 		{
+			"name": "mllm-sensor-server",
 			"path": "mllm-sensor-server"
 		},
 		{
+			"name": "vision-assistant-for-driving",
 			"path": "vision-assistant-for-driving"
+		},
+		{
+			"name": "mllm-security",
+			"path": "mllm-security"
 		}
 	],
 	"settings": {}
