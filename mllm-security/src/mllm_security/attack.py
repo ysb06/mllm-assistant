@@ -42,6 +42,9 @@ def on_caption_load(video_id: str, caption: str) -> str:
     new_caption = generate_caption(modals)
     return new_caption
 
+# 주의
+# 현재 Seed가 단일 모달(Velocity, Steering angles)에 대해서는 42로 고정되어 설정
+# 이후 생성되는 모달리티에 대해서는 시드가 다르므로 이 부분을 고려할 것
 
 def attack_random(data: List[float], max_val, min_val, seed: int = 42) -> str:
     rand = random.Random(seed)
@@ -54,7 +57,7 @@ def attack_on_modal():
     generate_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-steering-gpt-4o.pkl",
+        output_filename="results-atk-velocity-steering-gpt-4o.pkl",
         gpt_model="gpt-4o",
         on_caption_load=on_caption_load,
     )

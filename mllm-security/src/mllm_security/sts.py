@@ -1,69 +1,60 @@
-import os
 import pickle
-from typing import Any, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Tuple
 
 import nltk
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from bert_score import score
 
-nltk.download("punkt")
-nltk.download("punkt_tab")
+import pandas as pd
+from torch import Tensor
+from tqdm import tqdm
+
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+# nltk.download("punkt")
+# nltk.download("punkt_tab") # 필요 없으므로 주석처리
+
+
+def load_data(raw_path: str) -> List[Dict[str, str]]:
+    with open(raw_path, "rb") as f:
+        raw_data: Dict[int, Dict[str, str]] = pickle.load(f)
+    sorted_items = sorted(raw_data.items(), key=lambda x: x[0])
+    data_list = [v for _, v in sorted_items]
+    return data_list
 
 
 def calculate_bleu_score(reference: str, hypothesis: str) -> float:
-    """
-    reference: 정답 문장 (expected_answer)
-    hypothesis: 모델 답변 (model_answer)
-    """
-    # 간단히 whitespace 토크나이징. 필요에 따라 더 정교한 토크나이저 사용 가능.
     reference_tokens = nltk.word_tokenize(reference)
     hypothesis_tokens = nltk.word_tokenize(hypothesis)
 
-    # BLEU 계산 (여기서는 sentence_bleu사용)
-    # smoothingFunction은 BLEU 계산 시 0 나누기 오류 회피 및 점수 안정화에 도움.
     smoothie = SmoothingFunction().method4
-    score = sentence_bleu(
-        [reference_tokens], hypothesis_tokens, smoothing_function=smoothie
-    )
-    return score
+    score_val = sentence_bleu([reference_tokens], hypothesis_tokens, smoothing_function=smoothie)
+    return score_val
 
 
-def test_bleu(raw_path: str):
-    with open(raw_path, "rb") as f:
-        results: Dict[str, str] = pickle.load(f)
-
-    total_score = 0.0
-    count = 0
-    for result in results.values():
+def test_bleu(data: List[Dict[str, str]]) -> List[float]:
+    scores = []
+    for result in data:
         expected_answer = result["expected_answer"]
         model_answer = result["model_answer"]
         bleu = calculate_bleu_score(expected_answer, model_answer)
-        total_score += bleu
-        count += 1
+        scores.append(bleu)
 
-    avg_bleu = total_score / count if count > 0 else 0.0
-    print(f"Average BLEU score: {avg_bleu:.4f}")
+    if scores:
+        avg_bleu = sum(scores) / len(scores)
+        print(f"Average BLEU score: {avg_bleu:.4f}")
+    else:
+        print("No scores available.")
 
-
-def calculate_bertscore(
-    references: List[str], hypotheses: List[str], model_type: str = "bert-base-uncased"
-):
-    """
-    references와 hypotheses는 문장 리스트 형태여야 합니다.
-    model_type으로 사용할 언어모델을 지정할 수 있습니다.
-    """
-    P, R, F1 = score(hypotheses, references, model_type=model_type)
-    # F1.mean().item()로 평균 F1 스코어를 얻을 수 있습니다.
-    return P.mean().item(), R.mean().item(), F1.mean().item()
+    return scores
 
 
-def test_bertscore(raw_path: str):
-    with open(raw_path, "rb") as f:
-        results = pickle.load(f)
-
+def get_bertscore(data: List[Dict[str, str]]) -> List[float]:
     references = []
     hypotheses = []
-    for result in results.values():
+    for result in data:
         references.append(result["expected_answer"])
         hypotheses.append(result["model_answer"])
 
@@ -71,12 +62,76 @@ def test_bertscore(raw_path: str):
     print(
         f"BERTScore - P: {P.mean().item():.4f}, R: {R.mean().item():.4f}, F1: {F1.mean().item():.4f}"
     )
+    return F1.tolist()
+
+
+def analyze_score(
+    score_method: Callable[[List[Dict[str, str]]], List[Tensor]],
+    target_list: List[Tuple[str, List[Dict[str, str]]]],
+    sample_target: Optional[List[int]] = None,
+):
+    data = {}
+    for name, data_list in tqdm(target_list):
+        target_score = score_method(data_list)
+        data[name] = target_score
+    
+    df = pd.DataFrame(data)
+    if sample_target is not None:
+        print(f"Sampling from {len(df)} rows...")
+        df = df.iloc[sample_target]
+        print(f"After sampling: {len(df)} rows")
+    print(df.describe())
+
+    # ANOVA 분석을 위해 Long format으로 변환
+    df_melt = df.melt(var_name='group', value_name='score')
+
+    # OLS 모델 적합 및 ANOVA
+    model = ols('score ~ C(group)', data=df_melt).fit()
+    anova_table = sm.stats.anova_lm(model, typ=2)
+    print("\nANOVA results:")
+    print(anova_table)
+
+    # 사후 분석: Tukey's HSD, groups별로 점수 분포를 비교
+    tukey = pairwise_tukeyhsd(endog=df_melt['score'], groups=df_melt['group'], alpha=0.05)
+    print("\nTukey's HSD Post-hoc Test:")
+    print(tukey)
 
 
 if __name__ == "__main__":
-    # test_bleu("./output/results-normal-gpt-4o.pkl")
-    print("== Normal data:")
-    test_bertscore("./output/results-normal-gpt-4o.pkl")
+    normal_data = load_data("./output/results-normal-gpt-4o.pkl")
+    velocity_data = load_data("./output/results-atk-velocity-gpt-4o.pkl")
+    steering_data = load_data("./output/results-atk-steering-gpt-4o.pkl")
+    vel_ste_data = load_data("./output/results-atk-velocity-steering-gpt-4o.pkl")
 
-    print("== Attacked data:")
-    test_bertscore("./output/results-atk-velocity-gpt-4o.pkl")
+    # BERTScore 계산 후 특정 기준(예: 0.7 이상) 인덱스 추출
+    normal_scores = get_bertscore(normal_data)
+    target_idxs = [i for i, val in enumerate(normal_scores) if val > 0.6]
+
+    # sample 활용 예시
+    import random
+    sample_idxs = random.sample(target_idxs, min(len(target_idxs), 5))
+    for idx in sample_idxs:
+        print(f"Expected: {normal_data[idx]['expected_answer']}")
+        print(f"Model: {normal_data[idx]['model_answer']}")
+        print(f"Score: {normal_scores[idx]:.4f}")
+        print("-" * 50)
+
+    # analyze_score 호출 시 target_list를 (이름, 데이터) 형태로 전달
+    analyze_score(
+        score_method=get_bertscore,
+        target_list=[
+            ("Normal", normal_data),
+            ("Velocity", velocity_data),
+            ("Steering", steering_data),
+            ("Vel. & Ste.", vel_ste_data),
+        ],
+        sample_target=target_idxs,
+    )
+
+# Todo: Normal과 기존 데이터셋 비교 중 낮은 BERT Score의 데이터를 샘플링하여 어떤 차이를 보이는지 확인
+# Todo: GPT-4o 기반 이미지 모달리티 공격 구현
+# Todo: Normal을 기준으로 BERT Score 다시 계산
+# Todo: 이미지 모달리티까지 ANOVA 분석
+# Todo: BLEU Score 기반 분석도 추가
+# Todo: BeLLM 기반 Score로도 실험 진행
+# Todo: Calibrating Multimodal Learning (CML) 도 구현 및 분석
