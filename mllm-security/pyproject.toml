@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "Seungbin Yim", email = "ysb06@hotmail.com"},
 ]
-dependencies = ["openai>=1.57.0", "python-dotenv>=1.0.1", "torchtext>=0.18.0", "nltk>=3.9.1", "bert-score>=0.3.13", "statsmodels>=0.14.4"]
+dependencies = ["openai>=1.57.0", "python-dotenv>=1.0.1", "torchtext>=0.18.0", "nltk>=3.9.1", "bert-score>=0.3.13", "statsmodels>=0.14.4", "ollama>=0.4.4"]
 requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}

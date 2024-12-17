@@ -1,4 +1,6 @@
 import json
+import pickle
+from typing import Dict
 
 DEFAULT_VIDEO_CAPTION_PATH = (
     "../vision-assistant-for-driving/instruct-data/HAD/HAD-captions.json"
@@ -39,6 +41,12 @@ Note, indicate your car as ego-car.
 Question:
 """
 
+def get_generated_set(path: str):
+    with open(path, "rb") as f:
+        generated_set: Dict = pickle.load(f)
+    
+    return generated_set
+
 if __name__ == "__main__":    
     for instruction in instructions:
         caption = video_captions[instruction["video_id"]]
@@ -52,3 +60,12 @@ if __name__ == "__main__":
         print("-" * 35)
         print("Answer:", expected_answer)
         break
+    
+    print(f"Generated Set: 'results-normal-gpt-4o.pkl'")
+    generated_set = get_generated_set("./output/results-normal-gpt-4o.pkl")
+    for key, value in generated_set.items():
+        print(key, ":")
+        print("Video ID:", value["video_id"])
+        print("Caption:\n", value["caption"])
+        break
+        

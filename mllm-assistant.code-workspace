@@ -5,6 +5,14 @@
 			"path": "."
 		},
 		{
+			"name": "vision-assistant-for-driving",
+			"path": "vision-assistant-for-driving"
+		},
+		{
+			"name": "CML",
+			"path": "CML"
+		},
+		{
 			"name": "mllm-client",
 			"path": "mllm-client"
 		},
@@ -13,13 +21,11 @@
 			"path": "mllm-sensor-server"
 		},
 		{
-			"name": "vision-assistant-for-driving",
-			"path": "vision-assistant-for-driving"
-		},
-		{
 			"name": "mllm-security",
 			"path": "mllm-security"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"todo-tree.tree.showBadges": true
+	}
 }

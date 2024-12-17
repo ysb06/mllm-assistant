@@ -1,3 +1,6 @@
 [submodule "vision-assistant-for-driving"]
 	path = vision-assistant-for-driving
 	url = https://github.com/sungyeonparkk/vision-assistant-for-driving
+[submodule "CML"]
+	path = CML
+	url = https://github.com/QingyangZhang/CML

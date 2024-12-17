@@ -19,13 +19,6 @@ def get_model_answer(client: openai.OpenAI, query: str, model: str = "gpt-4o") -
     return response.choices[0].message.content.strip()
 
 
-def default_on_caption_load(video_id: str, caption: str) -> str:
-    if caption is None:
-        print(f"No caption found for video_id: {video_id}")
-        
-    return caption
-
-
 def generate_answer_with_context(
     qas: List[Dict[str, Union[str, Dict[str, str]]]],
     captions: Dict[str, str],
@@ -33,8 +26,9 @@ def generate_answer_with_context(
     output_filename: str = "results.json",
     gpt_model: str = "gpt-4o",
     max_length: int = 1000,
-    on_caption_load: Optional[Callable[[str, str], str]] = default_on_caption_load,
+    on_caption_load: Optional[Callable[[str, str], str]] = None,
     verbose: bool = True,
+    debug: bool = False,
 ) -> None:
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, output_filename)
@@ -77,20 +71,28 @@ def generate_answer_with_context(
                     continue
 
         query: str = caption + ANSWERING_PROMPT + question
-        model_answer: str = get_model_answer(client, query, model=gpt_model)
+        if not debug:
+            model_answer: str = get_model_answer(client, query, model=gpt_model)
 
-        result = {
-            "video_id": video_id,
-            "caption": caption,
-            "question": question,
-            "expected_answer": expected_answer,
-            "model_answer": model_answer,
-        }
+            result = {
+                "video_id": video_id,
+                "caption": caption,
+                "question": question,
+                "expected_answer": expected_answer,
+                "model_answer": model_answer,
+            }
 
-        results[idx] = result
+            results[idx] = result
 
-        with open(output_path, "wb") as f:
-            pickle.dump(results, f)
+            with open(output_path, "wb") as f:
+                pickle.dump(results, f)
+        else:
+            print(query)
+            print("-" * 35)
+            print("Answer:\n", expected_answer)
+            cmd = input("Stop? (y/n): ")
+            if cmd.lower() == "y":
+                break
 
 
 if __name__ == "__main__":

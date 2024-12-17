@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 import net from 'net';
+import NodeWebcam from 'node-webcam';
 
 const SERVER_ADDRESS = "localhost"
 const SERVER_PORT = 46011
@@ -15,6 +16,17 @@ export class RealtimeRelay {
     this.sensorSocket.connect(SERVER_PORT, SERVER_ADDRESS, () => {
       this.log('Connected to Sensor Server');
     });
+    this.webcam = NodeWebcam.create({
+      width: 1280,
+      height: 720,
+      quality: 80,
+      frames: 1,
+      saveShots: false,     // 임시로 이미지를 저장하지 않고 메모리에서 처리
+      output: "jpeg",
+      callbackReturn: "base64", // capture 시 base64 데이터를 바로 반환
+      verbose: false
+    });
+
     this.getSensorData = this.getSensorData.bind(this);
     this.getSensorDataInstructions = this.getSensorDataInstructions.bind(this);
   }
@@ -34,6 +46,20 @@ export class RealtimeRelay {
 
       this.sensorSocket.once('data', onData);
       this.sensorSocket.once('error', onError);
+    });
+  }
+
+  getWebcamImage() {
+    return new Promise((resolve, reject) => {
+      this.webcam.capture("temp_image", (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          // data: base64 인코딩된 이미지 데이터
+          const imageUri = "data:image/jpeg;base64," + data;
+          resolve(imageUri);
+        }
+      });
     });
   }
 
@@ -88,10 +114,15 @@ export class RealtimeRelay {
       if (event.type === 'session.created' || event.type === 'session.updated') {
         console.log(event);
       }
+
       if (event.type === 'response.done') {
         if (event.response.status === "failed") {
           console.log(event.response.status_details);
         }
+      }
+
+      if (event.type === 'error') {
+        console.error(event);
       }
       // else if (event.type.includes(".delta") == false)
       //   console.log(event);
@@ -100,7 +131,7 @@ export class RealtimeRelay {
       //   const newInstructions = await this.getSensorDataInstructions(client.sessionConfig.instructions);
       //   client.updateSession({ instructions: newInstructions });
       // }
-      
+
 
       ws.send(JSON.stringify(event));
     });
@@ -119,7 +150,10 @@ export class RealtimeRelay {
           client.updateSession(event.session);
         }
         else if (event.type === 'context.update') {
-          const contextText = await this.getSensorData();
+          const [contextText, webcamImageUri] = await Promise.all([
+            this.getSensorData(),
+            this.getWebcamImage()
+          ]);
           const contextUpdatePrompt = "이전 차량 상태는 무시하세요. 아래는 현재 차량 상태이며, 이후 제 질문에 답변할 때 이 차량 상태를 반드시 고려해야 합니다. 단, 이번 요청에 대한 답변은 ‘말씀하세요’라고만 해주세요:"
           const query = contextUpdatePrompt + contextText;
           client.sendUserMessageContent([
@@ -127,6 +161,11 @@ export class RealtimeRelay {
               type: 'input_text',
               text: query,
             },
+            // {
+            //   type: 'image_url',
+            //   image_url: { url: webcamImageUri },
+            // }
+            // 동작 안 함
           ]);
         }
         // 동작하지 않음

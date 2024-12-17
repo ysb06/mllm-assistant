@@ -13,8 +13,8 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
-# nltk.download("punkt")
-# nltk.download("punkt_tab") # 필요 없으므로 주석처리
+nltk.download("punkt")
+nltk.download("punkt_tab") # 필요 없으므로 주석처리
 
 
 def load_data(raw_path: str) -> List[Dict[str, str]]:
@@ -30,7 +30,9 @@ def calculate_bleu_score(reference: str, hypothesis: str) -> float:
     hypothesis_tokens = nltk.word_tokenize(hypothesis)
 
     smoothie = SmoothingFunction().method4
-    score_val = sentence_bleu([reference_tokens], hypothesis_tokens, smoothing_function=smoothie)
+    score_val = sentence_bleu(
+        [reference_tokens], hypothesis_tokens, smoothing_function=smoothie
+    )
     return score_val
 
 
@@ -64,6 +66,19 @@ def get_bertscore(data: List[Dict[str, str]]) -> List[float]:
     )
     return F1.tolist()
 
+def get_bleu_score(data: List[Dict[str, str]]) -> List[float]:
+    references = []
+    hypotheses = []
+    for result in data:
+        references.append(result["expected_answer"])
+        hypotheses.append(result["model_answer"])
+
+    scores = []
+    for reference, hypothesis in zip(references, hypotheses):
+        scores.append(calculate_bleu_score(reference, hypothesis))
+
+    return scores
+
 
 def analyze_score(
     score_method: Callable[[List[Dict[str, str]]], List[Tensor]],
@@ -74,7 +89,7 @@ def analyze_score(
     for name, data_list in tqdm(target_list):
         target_score = score_method(data_list)
         data[name] = target_score
-    
+
     df = pd.DataFrame(data)
     if sample_target is not None:
         print(f"Sampling from {len(df)} rows...")
@@ -83,49 +98,63 @@ def analyze_score(
     print(df.describe())
 
     # ANOVA 분석을 위해 Long format으로 변환
-    df_melt = df.melt(var_name='group', value_name='score')
+    df_melt = df.melt(var_name="group", value_name="score")
 
     # OLS 모델 적합 및 ANOVA
-    model = ols('score ~ C(group)', data=df_melt).fit()
+    model = ols("score ~ C(group)", data=df_melt).fit()
     anova_table = sm.stats.anova_lm(model, typ=2)
     print("\nANOVA results:")
     print(anova_table)
 
     # 사후 분석: Tukey's HSD, groups별로 점수 분포를 비교
-    tukey = pairwise_tukeyhsd(endog=df_melt['score'], groups=df_melt['group'], alpha=0.05)
+    tukey = pairwise_tukeyhsd(
+        endog=df_melt["score"], groups=df_melt["group"], alpha=0.05
+    )
     print("\nTukey's HSD Post-hoc Test:")
     print(tukey)
 
 
 if __name__ == "__main__":
-    normal_data = load_data("./output/results-normal-gpt-4o.pkl")
-    velocity_data = load_data("./output/results-atk-velocity-gpt-4o.pkl")
-    steering_data = load_data("./output/results-atk-steering-gpt-4o.pkl")
-    vel_ste_data = load_data("./output/results-atk-velocity-steering-gpt-4o.pkl")
+    atk_non_data = load_data("./output/results-normal-gpt-4o.pkl")
+    atk_vel_data = load_data("./output/results-atk-velocity-gpt-4o.pkl")
+    atk_str_data = load_data("./output/results-atk-steering-gpt-4o.pkl")
+    atk_vis_data = load_data("./output/results-atk-visual-gpt-4o.pkl")
+    atk_vel_str_data = load_data("./output/results-atk-velocity-steering-gpt-4o.pkl")
+    atk_vis_vel_data = load_data("./output/results-atk-visual-velocity-gpt-4o.pkl")
+    atk_vis_str_data = load_data("./output/results-atk-visual-steering-gpt-4o.pkl")
+    atk_all_data = load_data("./output/results-atk-all-gpt-4o.pkl")
 
     # BERTScore 계산 후 특정 기준(예: 0.7 이상) 인덱스 추출
-    normal_scores = get_bertscore(normal_data)
+    normal_scores = get_bertscore(atk_non_data)
     target_idxs = [i for i, val in enumerate(normal_scores) if val > 0.6]
 
     # sample 활용 예시
     import random
-    sample_idxs = random.sample(target_idxs, min(len(target_idxs), 5))
+
+    sample_idxs = random.sample(target_idxs, min(len(target_idxs), 1))
     for idx in sample_idxs:
-        print(f"Expected: {normal_data[idx]['expected_answer']}")
-        print(f"Model: {normal_data[idx]['model_answer']}")
+        print(f"Expected: {atk_non_data[idx]['expected_answer']}")
+        print(f"Model: {atk_non_data[idx]['model_answer']}")
         print(f"Score: {normal_scores[idx]:.4f}")
         print("-" * 50)
 
     # analyze_score 호출 시 target_list를 (이름, 데이터) 형태로 전달
+    target_list = [
+        ("Normal", atk_non_data),
+        ("Vis.", atk_vis_data),
+        ("Vel.", atk_vel_data),
+        ("Str.", atk_str_data),
+        ("Vis. & Vel.", atk_vis_vel_data),
+        ("Vis. & Str.", atk_vis_str_data),
+        ("Vel. & Str.", atk_vel_str_data),
+        ("All", atk_all_data),
+    ]
     analyze_score(
-        score_method=get_bertscore,
-        target_list=[
-            ("Normal", normal_data),
-            ("Velocity", velocity_data),
-            ("Steering", steering_data),
-            ("Vel. & Ste.", vel_ste_data),
-        ],
-        sample_target=target_idxs,
+        score_method=get_bleu_score, target_list=target_list, sample_target=target_idxs
+    )
+
+    analyze_score(
+        score_method=get_bertscore, target_list=target_list, sample_target=target_idxs
     )
 
 # Todo: Normal과 기존 데이터셋 비교 중 낮은 BERT Score의 데이터를 샘플링하여 어떤 차이를 보이는지 확인
