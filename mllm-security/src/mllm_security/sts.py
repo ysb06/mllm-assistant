@@ -131,7 +131,7 @@ if __name__ == "__main__":
     # sample 활용 예시
     import random
 
-    sample_idxs = random.sample(target_idxs, min(len(target_idxs), 1))
+    sample_idxs = random.sample(target_idxs, min(len(target_idxs), 3))
     for idx in sample_idxs:
         print(f"Expected: {atk_non_data[idx]['expected_answer']}")
         print(f"Model: {atk_non_data[idx]['model_answer']}")

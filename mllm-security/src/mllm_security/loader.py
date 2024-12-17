@@ -22,8 +22,7 @@ with open(DEFAULT_INSTRUCTION_PATH, "r") as f:
     print("Loaded", len(instructions), "instructions")
 
 ANSWERING_PROMPT = """
------------------------------------
-As an AI visual assistant of a driver, you are watching front-view road for around 20 seconds. You are given the summarization of road events and manuever of your ego-car during 20 seconds and some detailed information, which inlcudes "[attention]" you may take care of while driving, "[cause]" that makes you do [sitmulus-driven] behavior, "[goal-oriented]" that you do with a purpose of going somewhere or else, "[stimulus-driven]" behavior that reaction to some changes on road or traffic, "[Steering angles]" that is steering angle of ego-car at every second, and "[Velocities]" that is velocity of ego-car at every second.
+As an AI visual assistant of a driver, you are watching front-view road for around 20 seconds. You are given the summarization of road events, manuever of your ego-car during 20 seconds, and some detailed information, which inlcudes "[attention]" you may take care of while driving, "[cause]" that makes you do [sitmulus-driven] behavior, "[goal-oriented]" that you do with a purpose of going somewhere or else, "[stimulus-driven]" behavior that reaction to some changes on road or traffic, "[Steering angles]" that is steering angle of ego-car at every second, and "[Velocities]" that is velocity of ego-car at every second.
 
 The types of questions can be categorized into three types: Conversation, Description, and Reasoning.
 For Conversation, you can respond according to the given situation without any specific format constraints.
@@ -38,8 +37,7 @@ Answer the following question as if real people were talking!
 
 Note, indicate your car as ego-car.
 
-Question:
-"""
+""" + "-" * 16 + "\n"
 
 def get_generated_set(path: str):
     with open(path, "rb") as f:
