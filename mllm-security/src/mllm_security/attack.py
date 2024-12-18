@@ -45,6 +45,9 @@ def attack_random(data: List[float], a: float, b: float) -> str:
 def attack_visual(
     visual_modals: List[Modal], selection_ratio: float = 0.25
 ) -> List[Modal]:
+    if len(visual_modals) == 0:
+        return visual_modals
+    
     modal_idxs = list(range(len(visual_modals)))
     selection_count = round(len(visual_modals) * selection_ratio)
     selection_count = max(1, selection_count)
@@ -60,126 +63,6 @@ def attack_visual(
         visual_modals[idx] = (visual_modals[idx][0], attacked_text)
 
     return visual_modals
-
-
-# ------------------------------
-# on_caption_load의 커스텀 정의들. 이 함수로 공격을 구현.
-
-
-def on_caption_steering_attacked(video_id: str, caption: str) -> str:
-    modals = parse_caption(caption)
-    for i in range(len(modals)):
-        if modals[i][0] == "Steering Angles":
-            attacked_modal = attack_random(modals[i][1], 480, -480)
-            # Angle 값이 이러한 범위인 이유는 데이터셋이 이 범위 내 값으로만 이루어져 있기 때문
-            modals[i] = (modals[i][0], attacked_modal)
-
-    new_caption = generate_caption(modals)
-    return new_caption
-
-
-def on_caption_velocity_attacked(video_id: str, caption: str) -> str:
-    modals = parse_caption(caption)
-    for i in range(len(modals)):
-        if modals[i][0] == "Velocities":
-            attacked_modal = attack_random(modals[i][1], 120, 0)
-            # 속도가 120 이하로 설정된 이유는 데이터셋이 이 속도 이하로만 이루어져 있기 때문
-            modals[i] = (modals[i][0], attacked_modal)
-
-    new_caption = generate_caption(modals)
-    return new_caption
-
-
-def on_caption_steering_velocity_attacked(video_id: str, caption: str) -> str:
-    modals = parse_caption(caption)
-    for i in range(len(modals)):
-        if modals[i][0] == "Velocities":
-            attacked_modal = attack_random(modals[i][1], 120, 0)
-            modals[i] = (modals[i][0], attacked_modal)
-        if modals[i][0] == "Steering Angles":
-            attacked_modal = attack_random(modals[i][1], 480, -480)
-            modals[i] = (modals[i][0], attacked_modal)
-
-    new_caption = generate_caption(modals)
-    return new_caption
-
-
-def on_caption_visual_attacked(video_id: str, caption: str) -> str:
-    modals = parse_caption(caption)
-    visual_modals = []
-    non_visual_modals = []
-    for i in range(len(modals)):
-        if modals[i][0] != "Velocities" and modals[i][0] != "Steering Angles":
-            visual_modals.append(modals[i])
-        else:
-            non_visual_modals.append(modals[i])
-
-    visual_modals = attack_visual(visual_modals)
-    modals = visual_modals + non_visual_modals
-
-    new_caption = generate_caption(modals)
-    return new_caption
-
-
-def on_caption_visual_steering_attacked(video_id: str, caption: str):
-    modals = parse_caption(caption)
-    visual_modals = []
-    non_visual_modals = []
-    for i in range(len(modals)):
-        if modals[i][0] == "Steering Angles":
-            attacked_modal = attack_random(modals[i][1], 480, -480)
-            non_visual_modals.append((modals[i][0], attacked_modal))
-        elif modals[i][0] == "Velocities":
-            non_visual_modals.append(modals[i])
-        else:
-            visual_modals.append(modals[i])
-
-    visual_modals = attack_visual(visual_modals)
-    modals = visual_modals + non_visual_modals
-
-    new_caption = generate_caption(modals)
-    return new_caption
-
-
-def on_caption_visual_velocity_attacked(video_id: str, caption: str):
-    modals = parse_caption(caption)
-    visual_modals = []
-    non_visual_modals = []
-    for i in range(len(modals)):
-        if modals[i][0] == "Velocities":
-            attacked_modal = attack_random(modals[i][1], 120, 0)
-            non_visual_modals.append((modals[i][0], attacked_modal))
-        elif modals[i][0] == "Steering Angles":
-            non_visual_modals.append(modals[i])
-        else:
-            visual_modals.append(modals[i])
-
-    visual_modals = attack_visual(visual_modals)
-    modals = visual_modals + non_visual_modals
-
-    new_caption = generate_caption(modals)
-    return new_caption
-
-
-def on_caption_all_attacked(_: str, caption: str):
-    modals = parse_caption(caption)
-    visual_modals = []
-    non_visual_modals = []
-    for i in range(len(modals)):
-        if modals[i][0] == "Velocities":
-            attacked_modal = attack_random(modals[i][1], 120, 0)
-            non_visual_modals.append((modals[i][0], attacked_modal))
-        elif modals[i][0] == "Steering Angles":
-            attacked_modal = attack_random(modals[i][1], 480, -480)
-            non_visual_modals.append((modals[i][0], attacked_modal))
-        else:
-            visual_modals.append(modals[i])
-
-    visual_modals = attack_visual(visual_modals)
-    modals = visual_modals + non_visual_modals
-
-    new_caption = generate_caption(modals)
-    return new_caption
 
 
 def on_caption_attacked(
@@ -225,15 +108,13 @@ def on_caption_attacked(
     return new_caption
 
 
-# 끝 ------------------------------
-
 if __name__ == "__main__":
     # 모든 모달리티 사용, 모든 모달리티 정상
     random.seed(42)
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-normal-gpt-4o.yaml",
+        output_name="results-normal-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=None,
     )
@@ -243,7 +124,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-steering-gpt-4o.yaml",
+        output_name="results-atk-steering-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,
@@ -261,7 +142,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-velocity-gpt-4o.yaml",
+        output_name="results-atk-velocity-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,
@@ -279,7 +160,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-velocity-steering-gpt-4o.yaml",
+        output_name="results-atk-velocity-steering-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,
@@ -297,7 +178,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-visual-gpt-4o.yaml",
+        output_name="results-atk-visual-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,
@@ -315,7 +196,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-visual-steering-gpt-4o.yaml",
+        output_name="results-atk-visual-steering-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,
@@ -333,7 +214,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-visual-velocity-gpt-4o.yaml",
+        output_name="results-atk-visual-velocity-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,
@@ -351,7 +232,7 @@ if __name__ == "__main__":
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_filename="results-atk-all-gpt-4o.yaml",
+        output_name="results-atk-all-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
             on_caption_attacked,

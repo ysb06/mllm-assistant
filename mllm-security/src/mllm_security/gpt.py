@@ -7,7 +7,7 @@ import openai
 import yaml
 from tqdm import tqdm
 
-from mllm_security.loader import ANSWERING_PROMPT, instructions, video_captions
+from mllm_security.loader import ANSWERING_PROMPT
 
 EventCallback = Optional[
     Tuple[Callable[[str, str], str], Optional[List[Any]], Optional[Dict[str, Any]]]
@@ -29,7 +29,7 @@ def get_model_experiment_answer(
     client: openai.OpenAI,
     query: str,
     model: str = "gpt-4o",
-    logprobs_count: int = 3,
+    logprobs_count: Optional[int] = None,
 ) -> Tuple[Dict[str, Any], str, float]:
     response = client.chat.completions.create(
         model=model,
@@ -44,23 +44,24 @@ def get_model_experiment_answer(
     # https://platform.openai.com/docs/api-reference/chat/object
     result = response.choices[0]
 
-    message = result.message
+    message = result.message.content
     logprobs_contents = result.logprobs.content
     logprobs_list = []
     for content in logprobs_contents:
         logprobs_list.append(content.logprob)
     sentence_confidence = calculate_sentence_confidence(logprobs_list)
 
-    return response, message, sentence_confidence
+    return response.to_dict(), message, sentence_confidence
 
 
 def calculate_sentence_confidence(logprobs: List[float]) -> float:
     """
     토큰별 로그 확률 리스트를 받아 문장 전체의 확률(Confidence) 계산
     """
-    total_logprob = np.sum(logprobs)  # 로그 확률 합
-    sentence_confidence = np.exp(total_logprob)  # 확률로 변환
-    return sentence_confidence
+    total_logprob: np.float64 = np.sum(logprobs)  # 로그 확률 합
+    sentence_confidence: np.float64 = np.exp(total_logprob)  # 확률로 변환
+
+    return sentence_confidence.item()
 
 
 def generate_answer_with_context(
@@ -145,22 +146,25 @@ def generate_experiment_answer_with_context(
     qas: List[Dict[str, Union[str, Dict[str, str]]]],
     captions: Dict[str, str],
     output_dir: str = "./output",
-    output_filename: str = "results.yaml",
+    output_name: str = "results",
     gpt_model: str = "gpt-4o",
     max_length: int = 1000,
     on_caption_load: EventCallback = None,
     verbose: bool = True,
     debug: bool = False,
+    save_point: int = 100,
 ) -> None:
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, output_filename)
+    pickle_output_path = os.path.join(output_dir, f"{output_name}.pkl")
+    yaml_output_path = os.path.join(output_dir, f"{output_name}.yaml")
+
     results = {}
-    if not os.path.exists(output_path):
-        with open(output_path, "w") as f:
-            yaml.dump(results, f, sort_keys=False)
+    if not os.path.exists(pickle_output_path):
+        with open(pickle_output_path, "wb") as f:
+            pickle.dump(results, f)
     else:
-        with open(output_path, "r") as f:
-            results = yaml.load(f, Loader=yaml.FullLoader)
+        with open(pickle_output_path, "rb") as f:
+            results = pickle.load(f)
 
     client = openai.OpenAI()
 
@@ -222,8 +226,9 @@ def generate_experiment_answer_with_context(
 
             results[idx] = result
 
-            with open(output_path, "w") as f:
-                yaml.dump(results, f, sort_keys=False)
+            if idx % save_point == 0:
+                with open(pickle_output_path, "wb") as f:
+                    pickle.dump(results, f)
         else:
             print(query)
             print("-" * 35)
@@ -231,12 +236,13 @@ def generate_experiment_answer_with_context(
             cmd = input("Stop? (y/n): ")
             if cmd.lower() == "y":
                 break
-
-
-if __name__ == "__main__":
-    generate_answer_with_context(
-        instructions,
-        video_captions,
-        output_filename="results-normal-gpt-4o.pkl",
-        gpt_model="gpt-4o",
-    )
+    
+    with open(pickle_output_path, "wb") as f:
+        pickle.dump(results, f)
+    
+    for idx in list(results.keys()):
+        result = results[idx]
+        del result["model_response"]["response"]
+        
+    with open(yaml_output_path, "w") as f:
+        yaml.dump(results, f)
