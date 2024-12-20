@@ -47,7 +47,7 @@ def attack_visual(
 ) -> List[Modal]:
     if len(visual_modals) == 0:
         return visual_modals
-    
+
     modal_idxs = list(range(len(visual_modals)))
     selection_count = round(len(visual_modals) * selection_ratio)
     selection_count = max(1, selection_count)
@@ -108,141 +108,417 @@ def on_caption_attacked(
     return new_caption
 
 
+# -----------
+
+
+def on_caption_attacked_with_no_numeric(
+    _: str, caption: str, need_visual_attack: bool
+) -> str:
+    modals = parse_caption(caption)
+
+    description_modals = []
+    visual_modals = []
+
+    for modal in modals:
+        modal_name = modal[0].lower()
+
+        if modal_name == "road event" or modal_name == "car maneuver":
+            description_modals.append(modal)
+        elif modal_name == "steering angles":
+            pass
+        elif modal_name == "velocities":
+            pass
+        else:
+            visual_modals.append(modal)
+
+    if need_visual_attack:
+        visual_modals = attack_visual(deepcopy(visual_modals))
+
+    new_modals = description_modals + visual_modals
+    new_caption = generate_caption(new_modals)
+
+    return new_caption
+
+
+def on_caption_attacked_with_no_steering(
+    _: str,
+    caption: str,
+    need_visual_attack: bool,
+    need_velocity_attack: bool,
+) -> str:
+    modals = parse_caption(caption)
+
+    description_modals = []
+    visual_modals = []
+    numeric_modals = []
+
+    for modal in modals:
+        modal_name = modal[0].lower()
+        modal_value = modal[1]
+
+        if modal_name == "road event" or modal_name == "car maneuver":
+            description_modals.append(modal)
+        elif modal_name == "steering angles":
+            pass
+        elif modal_name == "velocities":
+            if need_velocity_attack:
+                attacked_modal = attack_random(deepcopy(modal_value), 120, 0)
+                numeric_modals.append((modal_name, attacked_modal))
+            else:
+                numeric_modals.append(modal)
+        else:
+            visual_modals.append(modal)
+
+    if need_visual_attack:
+        visual_modals = attack_visual(deepcopy(visual_modals))
+
+    new_modals = description_modals + visual_modals + numeric_modals
+    new_caption = generate_caption(new_modals)
+
+    return new_caption
+
+
+def on_caption_attacked_with_no_velocity(
+    _: str,
+    caption: str,
+    need_visual_attack: bool,
+    need_steering_attack: bool,
+) -> str:
+    modals = parse_caption(caption)
+
+    description_modals = []
+    visual_modals = []
+    numeric_modals = []
+
+    for modal in modals:
+        modal_name = modal[0].lower()
+        modal_value = modal[1]
+
+        if modal_name == "road event" or modal_name == "car maneuver":
+            description_modals.append(modal)
+        elif modal_name == "steering angles":
+            if need_steering_attack:
+                attacked_modal = attack_random(deepcopy(modal_value), 480, -480)
+                numeric_modals.append((modal_name, attacked_modal))
+            else:
+                numeric_modals.append(modal)
+        elif modal_name == "velocities":
+            pass
+        else:
+            visual_modals.append(modal)
+
+    if need_visual_attack:
+        visual_modals = attack_visual(deepcopy(visual_modals))
+
+    new_modals = description_modals + visual_modals + numeric_modals
+    new_caption = generate_caption(new_modals)
+
+    return new_caption
+
+
 if __name__ == "__main__":
-    # 모든 모달리티 사용, 모든 모달리티 정상
-    random.seed(42)
-    generate_experiment_answer_with_context(
-        instructions,
-        video_captions,
-        output_name="results-normal-gpt-4o",
-        gpt_model="gpt-4o",
-        on_caption_load=None,
-    )
+    # # 모든 모달리티 사용, 모든 모달리티 정상
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-normal-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=None,
+    # )
 
-    # 모든 모달리티 사용, Steering만 공격
+    # # 모든 모달리티 사용, Steering만 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-steering-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": False,
+    #             "need_steering_attack": True,
+    #             "need_velocity_attack": False,
+    #         },
+    #     ),
+    # )
+
+    # # 모든 모달리티 사용, Velocity만 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-velocity-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": False,
+    #             "need_steering_attack": False,
+    #             "need_velocity_attack": True,
+    #         },
+    #     ),
+    # )
+
+    # # 모든 모달리티 사용, Steering, Velocity 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-velocity-steering-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": False,
+    #             "need_steering_attack": True,
+    #             "need_velocity_attack": True,
+    #         },
+    #     ),
+    # )
+
+    # # 모든 모달리티 사용, Visual만 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-visual-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": True,
+    #             "need_steering_attack": False,
+    #             "need_velocity_attack": False,
+    #         },
+    #     ),
+    # )
+
+    # # 모든 모달리티 사용, Visual과 Steering에 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-visual-steering-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": True,
+    #             "need_steering_attack": True,
+    #             "need_velocity_attack": False,
+    #         },
+    #     ),
+    # )
+
+    # # 모든 모달리티 사용, Visual과 Velocity에 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-visual-velocity-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": True,
+    #             "need_steering_attack": False,
+    #             "need_velocity_attack": True,
+    #         },
+    #     ),
+    # )
+
+    # # 모든 모달리티 사용, Visual과 Velocity에 공격
+    # random.seed(42)
+    # generate_experiment_answer_with_context(
+    #     instructions,
+    #     video_captions,
+    #     output_name="results-atk-all-gpt-4o",
+    #     gpt_model="gpt-4o",
+    #     on_caption_load=(
+    #         on_caption_attacked,
+    #         None,
+    #         {
+    #             "need_visual_attack": True,
+    #             "need_steering_attack": True,
+    #             "need_velocity_attack": True,
+    #         },
+    #     ),
+    # )
+
+    # Visual 모달 만 사용, 공격 없음
     random.seed(42)
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_name="results-atk-steering-gpt-4o",
+        output_name="results-normal-with-no-numeric-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
-            on_caption_attacked,
+            on_caption_attacked_with_no_numeric,
+            None,
+            {
+                "need_visual_attack": False,
+            },
+        ),
+    )
+
+    # Visual 모달 만 사용, Visual에 공격
+    random.seed(42)
+    generate_experiment_answer_with_context(
+        instructions,
+        video_captions,
+        output_name="results-atk-visual-with-no-numeric-gpt-4o",
+        gpt_model="gpt-4o",
+        on_caption_load=(
+            on_caption_attacked_with_no_numeric,
+            None,
+            {
+                "need_visual_attack": True,
+            },
+        ),
+    )
+
+    # ------------------------------------------------
+    # Visual, Steering 사용, 공격 없음
+    random.seed(42)
+    generate_experiment_answer_with_context(
+        instructions,
+        video_captions,
+        output_name="results-normal-with-no-velocity-gpt-4o",
+        gpt_model="gpt-4o",
+        on_caption_load=(
+            on_caption_attacked_with_no_velocity,
+            None,
+            {
+                "need_visual_attack": False,
+                "need_steering_attack": False,
+            },
+        ),
+    )
+
+    # Visual, Steering 사용, Visual에 공격
+    random.seed(42)
+    generate_experiment_answer_with_context(
+        instructions,
+        video_captions,
+        output_name="results-atk-visual-with-no-velocity-gpt-4o",
+        gpt_model="gpt-4o",
+        on_caption_load=(
+            on_caption_attacked_with_no_velocity,
+            None,
+            {
+                "need_visual_attack": True,
+                "need_steering_attack": False,
+            },
+        ),
+    )
+
+    # Visual, Steering 사용, Steering 공격
+    random.seed(42)
+    generate_experiment_answer_with_context(
+        instructions,
+        video_captions,
+        output_name="results-atk-steering-with-no-velocity-gpt-4o",
+        gpt_model="gpt-4o",
+        on_caption_load=(
+            on_caption_attacked_with_no_velocity,
             None,
             {
                 "need_visual_attack": False,
                 "need_steering_attack": True,
+            },
+        ),
+    )
+
+    # Visual, Steering 사용, 전체 공격
+    random.seed(42)
+    generate_experiment_answer_with_context(
+        instructions,
+        video_captions,
+        output_name="results-atk-all-with-no-velocity-gpt-4o",
+        gpt_model="gpt-4o",
+        on_caption_load=(
+            on_caption_attacked_with_no_velocity,
+            None,
+            {
+                "need_visual_attack": True,
+                "need_steering_attack": True,
+            },
+        ),
+    )
+
+    # ------------------------------------------------
+    # Visual, Velocity 사용, 공격 없음
+    random.seed(42)
+    generate_experiment_answer_with_context(
+        instructions,
+        video_captions,
+        output_name="results-normal-with-no-steering-gpt-4o",
+        gpt_model="gpt-4o",
+        on_caption_load=(
+            on_caption_attacked_with_no_steering,
+            None,
+            {
+                "need_visual_attack": False,
                 "need_velocity_attack": False,
             },
         ),
     )
 
-    # 모든 모달리티 사용, Velocity만 공격
+    # Visual, Velocity 사용, Visual에 공격
     random.seed(42)
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_name="results-atk-velocity-gpt-4o",
+        output_name="results-atk-visual-with-no-steering-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
-            on_caption_attacked,
-            None,
-            {
-                "need_visual_attack": False,
-                "need_steering_attack": False,
-                "need_velocity_attack": True,
-            },
-        ),
-    )
-
-    # 모든 모달리티 사용, Steering, Velocity 공격
-    random.seed(42)
-    generate_experiment_answer_with_context(
-        instructions,
-        video_captions,
-        output_name="results-atk-velocity-steering-gpt-4o",
-        gpt_model="gpt-4o",
-        on_caption_load=(
-            on_caption_attacked,
-            None,
-            {
-                "need_visual_attack": False,
-                "need_steering_attack": True,
-                "need_velocity_attack": True,
-            },
-        ),
-    )
-
-    # 모든 모달리티 사용, Visual만 공격
-    random.seed(42)
-    generate_experiment_answer_with_context(
-        instructions,
-        video_captions,
-        output_name="results-atk-visual-gpt-4o",
-        gpt_model="gpt-4o",
-        on_caption_load=(
-            on_caption_attacked,
+            on_caption_attacked_with_no_steering,
             None,
             {
                 "need_visual_attack": True,
-                "need_steering_attack": False,
                 "need_velocity_attack": False,
             },
         ),
     )
 
-    # 모든 모달리티 사용, Visual과 Steering에 공격
+    # Visual, Velocity 사용, Velocity에 공격
     random.seed(42)
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_name="results-atk-visual-steering-gpt-4o",
+        output_name="results-atk-velocity-with-no-steering-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
-            on_caption_attacked,
+            on_caption_attacked_with_no_steering,
             None,
             {
-                "need_visual_attack": True,
-                "need_steering_attack": True,
-                "need_velocity_attack": False,
-            },
-        ),
-    )
-
-    # 모든 모달리티 사용, Visual과 Velocity에 공격
-    random.seed(42)
-    generate_experiment_answer_with_context(
-        instructions,
-        video_captions,
-        output_name="results-atk-visual-velocity-gpt-4o",
-        gpt_model="gpt-4o",
-        on_caption_load=(
-            on_caption_attacked,
-            None,
-            {
-                "need_visual_attack": True,
-                "need_steering_attack": False,
+                "need_visual_attack": False,
                 "need_velocity_attack": True,
             },
         ),
     )
 
-    # 모든 모달리티 사용, Visual과 Velocity에 공격
+    # Visual, Velocity 사용, 전체 공격
     random.seed(42)
     generate_experiment_answer_with_context(
         instructions,
         video_captions,
-        output_name="results-atk-all-gpt-4o",
+        output_name="results-atk-all-with-no-steering-gpt-4o",
         gpt_model="gpt-4o",
         on_caption_load=(
-            on_caption_attacked,
+            on_caption_attacked_with_no_steering,
             None,
             {
                 "need_visual_attack": True,
-                "need_steering_attack": True,
                 "need_velocity_attack": True,
             },
         ),
     )
-
-    # --------------- 모달리티 오염 공격 끝 ----------------- #
