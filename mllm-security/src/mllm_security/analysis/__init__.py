@@ -1,0 +1,17 @@
+plain_normal_path = "./output/results-normal-gpt-4o.pkl"
+no_numeric_normal_path = "./output/results-normal-with-no-numeric-gpt-4o.pkl"
+no_steering_normal_path = "./output/results-normal-with-no-steering-gpt-4o.pkl"
+no_velocity_normal_path = "./output/results-normal-with-no-velocity-gpt-4o.pkl"
+no_visual_normal_path = "./output/results-normal-with-no-visual-gpt-4o.pkl"
+
+normal_with_only_visual_path = "./output/results-normal-with-no-numeric-gpt-4o.pkl"
+attacked_visual_with_only_visual_path = "./output/results-atk-visual-with-no-numeric-gpt-4o.pkl"
+attacked_visual_with_visual_steering_path = "./output/results-atk-visual-with-no-velocity-gpt-4o.pkl"
+attacked_visual_with_visual_velocity_path = "./output/results-atk-visual-with-no-steering-gpt-4o.pkl"
+attacked_visual_with_all_path = "./output/results-atk-visual-gpt-4o.pkl"
+
+attacked_steering_with_all_path = "./output/results-atk-steering-gpt-4o.pkl"
+attacked_velocity_with_all_path = "./output/results-atk-velocity-gpt-4o.pkl"
+attacked_visual_steering_with_all_path = "./output/results-atk-visual-steering-gpt-4o.pkl"
+attacked_visual_velocity_with_all_path = "./output/results-atk-visual-velocity-gpt-4o.pkl"
+attacked_all_with_all_path = "./output/results-atk-all-gpt-4o.pkl"

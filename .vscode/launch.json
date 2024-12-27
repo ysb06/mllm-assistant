@@ -5,17 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Security Analysis",
+            "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "module": "mllm_security",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Generate Attacked Data",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "src/mllm_security/attack.py",
+            "program": "${file}",
             "console": "integratedTerminal"
         }
     ]

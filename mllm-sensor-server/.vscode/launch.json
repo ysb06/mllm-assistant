@@ -5,17 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run FastAPI Server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "mllm_server",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Run UDP Server",
             "type": "debugpy",
             "request": "launch",
             "module": "sensor_server",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python Debugger: Current File in Sensor Server",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
             "console": "integratedTerminal"
         }
     ]

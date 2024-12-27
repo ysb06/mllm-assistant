@@ -1,8 +1,16 @@
 {
 	"folders": [
 		{
-			"name": "mllm-assistant",
+			"name": "Root Project Folder",
 			"path": "."
+		},
+		{
+			"name": "mllm-sensor-server",
+			"path": "mllm-sensor-server"
+		},
+		{
+			"name": "mllm-client",
+			"path": "mllm-client"
 		},
 		{
 			"name": "vision-assistant-for-driving",
@@ -11,14 +19,6 @@
 		{
 			"name": "CML",
 			"path": "CML"
-		},
-		{
-			"name": "mllm-client",
-			"path": "mllm-client"
-		},
-		{
-			"name": "mllm-sensor-server",
-			"path": "mllm-sensor-server"
 		},
 		{
 			"name": "mllm-security",
