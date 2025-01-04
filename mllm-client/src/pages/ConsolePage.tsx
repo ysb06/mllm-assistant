@@ -20,16 +20,16 @@ import { instructions } from '../utils/conversation_config.js';
 import { WavRenderer } from '../utils/wav_renderer';
 
 import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
-import { Button } from '../components/button/Button';
-import { Toggle } from '../components/toggle/Toggle';
-import { Map } from '../components/Map';
+import { Button } from '../components/legacy/button/Button';
+import { Toggle } from '../components/legacy/toggle/Toggle';
+import { Map } from '../components/legacy/Map';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
 
-import { SessionManager, SessionInfo } from '../components/session-manager/SessionManager';
-import { ContextManager, ContextInfo } from '../components/context-manager/ContextManager';
-import { Conversation, TextConversationInput } from '../components/conversation/Conversation';
+import { SessionManager, SessionInfo } from '../components/legacy/session-manager/SessionManager';
+import { ContextManager, ContextInfo } from '../components/legacy/context-manager/ContextManager';
+import { Conversation, TextConversationInput } from '../components/legacy/conversation/Conversation';
 
 /**
  * Type for result from get_weather() function call
