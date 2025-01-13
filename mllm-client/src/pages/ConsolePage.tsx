@@ -25,10 +25,9 @@ import { Toggle } from '../components/legacy/toggle/Toggle';
 import { Map } from '../components/legacy/Map';
 
 import './ConsolePage.scss';
-import { isJsxOpeningLikeElement } from 'typescript';
 
 import { SessionManager, SessionInfo } from '../components/legacy/session-manager/SessionManager';
-import { ContextManager, ContextInfo } from '../components/legacy/context-manager/ContextManager';
+import { ContextManager } from '../components/legacy/context-manager/ContextManager';
 import { Conversation, TextConversationInput } from '../components/legacy/conversation/Conversation';
 
 /**

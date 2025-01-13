@@ -13,14 +13,6 @@
 			"path": "mllm-client"
 		},
 		{
-			"name": "vision-assistant-for-driving",
-			"path": "vision-assistant-for-driving"
-		},
-		{
-			"name": "CML",
-			"path": "CML"
-		},
-		{
 			"name": "mllm-security",
 			"path": "mllm-security"
 		}

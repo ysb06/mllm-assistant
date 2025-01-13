@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:7457c719a2bebf6c3b4ad330692a6e525e7319e75ab3970a8aa7bf7d681ed0f4"
+content_hash = "sha256:305a790d1e6ffcd7b7b02e96afc02c66bd4e2c7ffaf1c7afcfc52a404cfbdb17"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -419,7 +419,7 @@ files = [
 
 [[package]]
 name = "langsmith"
-version = "0.2.7"
+version = "0.2.10"
 requires_python = "<4.0,>=3.9"
 summary = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 groups = ["default"]
@@ -432,8 +432,8 @@ dependencies = [
     "requests<3,>=2",
 ]
 files = [
-    {file = "langsmith-0.2.7-py3-none-any.whl", hash = "sha256:ae7a0620e9fc4da2b2e4ef7beccdadb0f9009cca0fd71ac08d372660639e2fab"},
-    {file = "langsmith-0.2.7.tar.gz", hash = "sha256:0996d12622b56ff21414ab8b5c16cbe3ff389a3668fa3fd1d82475bd57e5bc9e"},
+    {file = "langsmith-0.2.10-py3-none-any.whl", hash = "sha256:b02f2f174189ff72e54c88b1aa63343defd6f0f676c396a690c63a4b6495dcc2"},
+    {file = "langsmith-0.2.10.tar.gz", hash = "sha256:153c7b3ccbd823528ff5bec84801e7e50a164e388919fc583252df5b27dd7830"},
 ]
 
 [[package]]
