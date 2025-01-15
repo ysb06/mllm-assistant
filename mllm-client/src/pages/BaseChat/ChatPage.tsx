@@ -1,24 +1,29 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { StateGraph, EventList } from '../components/chatbot/LangGraph';
-import { IEventElement, IChatElement } from '../lib/langgraph';
-import { ChatList, ChatInput, sendChatMessage } from '../components/chatbot/ChatContent';
+import { StateGraph, EventList } from '../../components/chatbot/LangGraph';
+import { IEventElement, IChatElement } from '../../lib/langgraph';
+import { ChatList, ChatInput, sendChatMessage } from '../../components/chatbot/ChatContent';
 
 import './ChatPage.scss';
 
 interface IChatPageProps {
-    serverUrl?: string
+    title?: string;
+    serverUrl?: string;
 }
 
-function PageTitle() {
+interface IPageTitleProps {
+    title: string;
+}
+
+function PageTitle({ title }: IPageTitleProps) {
     return (
         <div className="title">
             <img src="/openai-logomark.svg" />
-            <span>Realtime Console</span>
+            <span>LangChain Console - {title}</span>
         </div>
     )
 }
 
-export function ChatPage({ serverUrl = "http://127.0.0.1:8000/service/chatbot" }: IChatPageProps) {
+export function ChatPage({ title = "Chatbot", serverUrl = "http://127.0.0.1:8000/service/chatbot" }: IChatPageProps) {
     // const startTimeRef = useRef<string>(new Date().toISOString());
     const [messages, setMessages] = useState<IChatElement[]>([
         {   // Initial messages with prompt
@@ -54,7 +59,7 @@ export function ChatPage({ serverUrl = "http://127.0.0.1:8000/service/chatbot" }
     return (
         <div data-component="ChatPage">
             <header>
-                <PageTitle />
+                <PageTitle title={title}/>
             </header>
             <main>
                 <div className="chat-content">

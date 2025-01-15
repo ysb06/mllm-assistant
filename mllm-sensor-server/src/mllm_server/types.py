@@ -85,4 +85,5 @@ class UserMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
+    session: Optional[str] = None
     messages: List[Union[UserMessage, AssistantMessage, SystemMessage, ToolCallMessage]]

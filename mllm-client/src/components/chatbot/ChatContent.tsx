@@ -65,9 +65,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     );
 }
 
-export async function sendChatMessage(messages: IChatElement[], url: string, onStreamReceive: (content: IEventElement) => void) {
-    const content = {
+export async function sendChatMessage(
+    messages: IChatElement[], 
+    url: string, onStreamReceive: (content: IEventElement) => void, 
+    session: string | null = null
+) {
+    const content: { messages: IChatElement[], session?: string } = {
         messages: messages,
+    }
+    if (session) {
+        content["session"] = session;
     }
     const request = {
         method: "POST",

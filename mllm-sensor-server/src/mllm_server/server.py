@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.services.chatbot import chatbot_router
+from .routers.services.tool_chatbot import tool_chatbot_router
 
 
 load_dotenv()
@@ -13,10 +14,9 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 fastapi_app = FastAPI()
 fastapi_app.include_router(chatbot_router)
+fastapi_app.include_router(tool_chatbot_router)
 
 origins = [
-    # "http://localhost.tiangolo.com",
-    # "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
 ]

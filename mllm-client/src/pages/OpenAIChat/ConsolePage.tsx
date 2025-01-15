@@ -11,24 +11,24 @@
 const LOCAL_RELAY_SERVER_URL: string =
   process.env.REACT_APP_LOCAL_RELAY_SERVER_URL || '';
 
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { RealtimeClient } from '@openai/realtime-api-beta';
-import { ItemType } from '@openai/realtime-api-beta/dist/lib/client.js';
-import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
-import { instructions } from '../utils/conversation_config.js';
-import { WavRenderer } from '../utils/wav_renderer';
+import { ItemType } from '@openai/realtime-api-beta/dist/lib/client';
+import { WavRecorder, WavStreamPlayer } from '../../lib/wavtools/index';
+import { instructions } from '../../utils/conversation_config';
+import { WavRenderer } from '../../utils/wav_renderer';
 
-import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
-import { Button } from '../components/legacy/button/Button';
-import { Toggle } from '../components/legacy/toggle/Toggle';
-import { Map } from '../components/legacy/Map';
+import { ArrowDown, ArrowUp, Edit, X, Zap } from 'react-feather';
+import { Button } from '../../components/legacy/button/Button';
+import { Map } from '../../components/legacy/Map';
+import { Toggle } from '../../components/legacy/toggle/Toggle';
+
+import { ContextManager } from '../../components/legacy/context-manager/ContextManager';
+import { Conversation, TextConversationInput } from '../../components/legacy/conversation/Conversation';
+import { SessionInfo, SessionManager } from '../../components/legacy/session-manager/SessionManager';
 
 import './ConsolePage.scss';
-
-import { SessionManager, SessionInfo } from '../components/legacy/session-manager/SessionManager';
-import { ContextManager } from '../components/legacy/context-manager/ContextManager';
-import { Conversation, TextConversationInput } from '../components/legacy/conversation/Conversation';
 
 /**
  * Type for result from get_weather() function call

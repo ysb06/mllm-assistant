@@ -1,0 +1,180 @@
+[data-component='ChatPage'] {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 12px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* 전체가 아닌 main 안에서 스크롤하도록 */
+    margin: 16px;
+
+    &>div {
+        flex-shrink: 0;
+    }
+
+    header {
+        margin-bottom: 8px;
+
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            img {
+                width: 24px;
+                height: 24px;
+            }
+        }
+    }
+
+    /* main 영역: 채팅창과 사이드바를 좌우로 배치 */
+    main {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        /* 자식이 스크롤하도록 설정 */
+        margin: 8px 0;
+
+        /* 채팅 영역과 사이드바를 가로로 나란히 배치 */
+        .chat-content {
+            display: flex;
+            flex-direction: column;
+            /* 채팅 영역이 왼쪽 넓은 공간을 차지하도록 */
+            flex: 2;
+            margin-right: 8px;
+            overflow: hidden;
+        }
+
+        .chat-sidebar {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            margin-right: 8px;
+            overflow: hidden;
+          
+            /* 이벤트 목록 영역 */
+            [data-component='EventList'] {
+              display: flex;
+              flex-direction: column;
+              flex: 1;
+              min-height: 0;
+          
+              .event-container {
+                flex: 1;
+                overflow-y: auto;
+          
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 8px;
+                margin-bottom: 8px;
+                box-sizing: border-box;
+          
+                .event-item {
+                  margin-bottom: 6px;
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                  background-color: #f7f7f7;
+                  cursor: pointer;
+          
+                  &:hover {
+                    background-color: #eaeaea;
+                  }
+                }
+              }
+            }
+          
+            [data-component='LangGraphImage'] {
+              img {
+                height: 150px;
+                border-radius: 4px;
+                margin: auto;
+                display: block;
+              }
+            }
+
+            .session {
+                display: flex;
+            }
+
+            [data-component='Session'] {
+                flex: 1;
+            }
+          }
+
+
+
+
+        /* 채팅 영역 스타일 */
+        [data-component='ChatList'] {
+            flex: 1;
+            overflow-y: auto;
+
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+
+            /* 각 메시지의 스타일 */
+            div {
+                margin-bottom: 6px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                background-color: #f7f7f7;
+
+                &.user {
+                    background-color: #e4f0e2;
+                    text-align: right;
+                }
+
+                &.assistant {
+                    background-color: #f5f1bf;
+                    text-align: left;
+                }
+
+                &.system {
+                    font-weight: bold;
+                    background-color: #ffffff;
+                    color: #666;
+                }
+            }
+        }
+    }
+
+    footer {
+        margin-top: 8px;
+    }
+}
+
+/* 채팅 입력영역 스타일 */
+[data-component='ChatInput'] {
+    display: flex;
+    gap: 8px;
+
+    textarea {
+        flex: 1;
+        min-height: 40px;
+        font-family: inherit;
+        font-size: inherit;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        padding: 8px;
+        box-sizing: border-box;
+        resize: none;
+    }
+
+    button {
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #eeeeee;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
