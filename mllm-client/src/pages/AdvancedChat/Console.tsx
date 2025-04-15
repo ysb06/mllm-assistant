@@ -8,7 +8,7 @@ import { Selector } from './Session';
 import { v4 as uuidv4 } from 'uuid';
 
 
-const SERVER_URL = "http://127.0.0.1:8000/service/tool-chatbot"
+const SERVER_URL = "http://127.0.0.1:8000/chatbot"
 
 interface IPageTitleProps {
     title: string;

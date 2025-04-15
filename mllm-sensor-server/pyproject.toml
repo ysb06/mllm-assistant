@@ -2,18 +2,28 @@
 name = "mllm-sensor-server"
 version = "0.1.0"
 description = "Default template for PDM package"
-authors = [
-    {name = "sbyim", email = "ysb06@hotmail.com"},
+authors = [{ name = "sbyim", email = "ysb06@hotmail.com" }]
+dependencies = [
+    "fastapi>=0.115.6",
+    "uvicorn[standard]>=0.34.0",
+    "openai>=1.58.1",
+    "python-dotenv>=1.0.1",
+    "langgraph>=0.2.60",
+    "langchain-ollama>=0.2.2",
+    "langchain-openai>=0.2.14",
+    "langsmith>=0.2.10",
+    "tavily-python>=0.5.0",
+    "langchain-community>=0.3.14",
+    "langgraph-checkpoint-sqlite>=2.0.1",
+    "pygraphviz>=1.14"
 ]
-dependencies = ["fastapi>=0.115.6", "uvicorn[standard]>=0.34.0", "openai>=1.58.1", "python-dotenv>=1.0.1", "langgraph>=0.2.60", "langchain-ollama>=0.2.2", "langchain-openai>=0.2.14", "langsmith>=0.2.10", "tavily-python>=0.5.0", "langchain-community>=0.3.14", "langgraph-checkpoint-sqlite>=2.0.1"]
 requires-python = ">=3.11"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
-
 
 [tool.pdm]
 distribution = true

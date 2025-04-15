@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers.services.chatbot import chatbot_router
-from .routers.services.tool_chatbot import tool_chatbot_router
+from .routers.chatbot import chatbot_router
 
 
 load_dotenv()
@@ -14,7 +13,6 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 fastapi_app = FastAPI()
 fastapi_app.include_router(chatbot_router)
-fastapi_app.include_router(tool_chatbot_router)
 
 origins = [
     "http://localhost",
@@ -30,6 +28,7 @@ fastapi_app.add_middleware(
 )
 
 # llm_gpt4omini = ChatOpenAI(model="gpt-4o-mini")
+
 
 @fastapi_app.get("/")
 def read_root() -> Dict[str, str]:

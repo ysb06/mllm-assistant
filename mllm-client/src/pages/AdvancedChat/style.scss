@@ -1,3 +1,6 @@
+/* style.scss */
+
+/* 공통 ChatPage 스타일 */
 [data-component='ChatPage'] {
     font-family: 'Roboto Mono', monospace;
     font-weight: 400;
@@ -7,8 +10,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* 전체가 아닌 main 안에서 스크롤하도록 */
-    margin: 16px;
+    margin: 16px; /* 페이지 바깥 여백 */
 
     &>div {
         flex-shrink: 0;
@@ -29,115 +31,144 @@
         }
     }
 
-    /* main 영역: 채팅창과 사이드바를 좌우로 배치 */
+    /* 메인영역: 채팅창과 사이드바를 좌우로 배치 */
     main {
         flex: 1;
         display: flex;
-        overflow: hidden;
-        /* 자식이 스크롤하도록 설정 */
+        overflow: hidden; /* 내부에서 스크롤 */
         margin: 8px 0;
 
-        /* 채팅 영역과 사이드바를 가로로 나란히 배치 */
+        /* 채팅영역 */
         .chat-content {
             display: flex;
             flex-direction: column;
-            /* 채팅 영역이 왼쪽 넓은 공간을 차지하도록 */
             flex: 2;
-            margin-right: 8px;
-            overflow: hidden;
+            margin-right: 8px; 
+            overflow: hidden; /* 내부 ChatList가 스크롤 */
+
+            [data-component='ChatList'] {
+                flex: 1;
+                overflow-y: auto;
+                scroll-behavior: smooth; /* 새로운 메시지 추가 시 부드러운 스크롤 */
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 8px;
+                margin-bottom: 8px;
+                box-sizing: border-box;
+
+                /* 각 메시지 스타일 */
+                div {
+                    margin-bottom: 6px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    background-color: #f7f7f7;
+
+                    &.user {
+                        background-color: #e4f0e2;
+                        text-align: right;
+                    }
+
+                    &.assistant {
+                        background-color: #f5f1bf;
+                        text-align: left;
+                    }
+
+                    &.system {
+                        font-weight: bold;
+                        background-color: #ffffff;
+                        color: #666;
+                    }
+                }
+            }
         }
 
+        /* 사이드바 */
         .chat-sidebar {
             display: flex;
             flex-direction: column;
             flex: 1;
             margin-right: 8px;
             overflow: hidden;
-          
-            /* 이벤트 목록 영역 */
+
+            /* 이벤트 목록 (EventList) */
             [data-component='EventList'] {
-              display: flex;
-              flex-direction: column;
-              flex: 1;
-              min-height: 0;
-          
-              .event-container {
-                flex: 1;
-                overflow-y: auto;
-          
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                padding: 8px;
-                margin-bottom: 8px;
-                box-sizing: border-box;
-          
-                .event-item {
-                  margin-bottom: 6px;
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                  background-color: #f7f7f7;
-                  cursor: pointer;
-          
-                  &:hover {
-                    background-color: #eaeaea;
-                  }
-                }
-              }
-            }
-          
-            [data-component='LangGraphImage'] {
-              img {
-                height: 150px;
-                border-radius: 4px;
-                margin: auto;
-                display: block;
-              }
-            }
-
-            .session {
                 display: flex;
-            }
-
-            [data-component='Session'] {
+                flex-direction: column;
                 flex: 1;
+                min-height: 0; /* 자식이 스크롤하도록 */
+                
+                .event-container {
+                    flex: 1;
+                    overflow-y: auto;
+                    scroll-behavior: smooth; /* 이벤트 추가 시 부드러운 스크롤 */
+
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    padding: 8px;
+                    margin-bottom: 8px;
+                    box-sizing: border-box;
+
+                    .event-item {
+                        margin-bottom: 6px;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        background-color: #f7f7f7;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: #eaeaea;
+                        }
+                    }
+                }
             }
-          }
 
+            /* LangGraphImage (StateGraph 미리보기) */
+            [data-component='LangGraphImage'] {
+                img {
+                    height: 150px; 
+                    border-radius: 4px;
+                    margin: auto;
+                    display: block;
+                }
+            }
 
+            /* 세션 관련 영역 (StateGraph와 Selector를 한 줄로) */
+            .session {
+                display: flex;    /* 가로 배치 */
+                gap: 8px;         /* 사이 간격 */
+                margin-top: 8px;
+                max-height: 220px;
 
-
-        /* 채팅 영역 스타일 */
-        [data-component='ChatList'] {
-            flex: 1;
-            overflow-y: auto;
-
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 8px;
-            margin-bottom: 8px;
-            box-sizing: border-box;
-
-            /* 각 메시지의 스타일 */
-            div {
-                margin-bottom: 6px;
-                padding: 4px 8px;
-                border-radius: 4px;
-                background-color: #f7f7f7;
-
-                &.user {
-                    background-color: #e4f0e2;
-                    text-align: right;
+                /* StateGraph 컴포넌트(혹은 LangGraphImage가 여기 들어온다면) */
+                [data-component='LangGraphImage'] {
+                    margin: 0;
                 }
 
-                &.assistant {
-                    background-color: #f5f1bf;
-                    text-align: left;
-                }
+                /* 실제 Session Selector */
+                [data-component='Selector'] {
+                    flex: 1;
+                    overflow-y: auto;
+                    scroll-behavior: smooth;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    box-sizing: border-box;
+                    margin: 8px;
 
-                &.system {
-                    font-weight: bold;
-                    background-color: #ffffff;
-                    color: #666;
+                    /* 세션 목록 스타일이 필요하다면 추가 */
+                    ul, li {
+                        list-style: none;
+                        margin: 8px 0;
+                        padding: 0;
+                    }
+                    li {
+                        cursor: pointer;
+                        margin-bottom: 4px;
+
+                        &:hover {
+                            background-color: #f0f0f0;
+                        }
+                    }
                 }
             }
         }
@@ -148,7 +179,7 @@
     }
 }
 
-/* 채팅 입력영역 스타일 */
+/* 채팅 입력 영역 (ChatInput) */
 [data-component='ChatInput'] {
     display: flex;
     gap: 8px;

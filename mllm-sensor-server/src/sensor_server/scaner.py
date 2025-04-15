@@ -11,7 +11,7 @@ from sensor_server.server import SERVER_IP
 from .server import SensorServer
 
 # SCANER_SERVER_IP = "192.168.1.6"
-SCANER_SERVER_IP = "localhost"
+SCANER_SERVER_IP = "192.168.0.98"
 SCANER_SERVER_PORT = 46012
 DATA_VALUE_SIZE = 8  # 32-bit float
 

@@ -10,13 +10,6 @@
             "request": "launch",
             "module": "mllm_server",
             "console": "integratedTerminal"
-        },
-        {
-            "name": "Run UDP Server",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "sensor_server",
-            "console": "integratedTerminal"
         }
     ]
 }

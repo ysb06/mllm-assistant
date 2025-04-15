@@ -34,13 +34,13 @@ tavily_tool = TavilySearchResults(max_results=2)
 tools = [tavily_tool]
 
 llm_llama = ChatOllama(model="llama3.1")
-llm_gpt = ChatOpenAI(model="gpt-4o-mini")
-tools_llm_llama = llm_llama.bind_tools(tools)
-tools_llm_gpt = llm_gpt.bind_tools(tools)
+tools_llm = llm_llama.bind_tools(tools)
+# llm_gpt = ChatOpenAI(model="gpt-4o-mini")
+# tools_llm = llm_gpt.bind_tools(tools)
 
 
 def node_llama_chatbot(state: State):
-    return {"messages": [tools_llm_llama.invoke(state["messages"])]}
+    return {"messages": [tools_llm.invoke(state["messages"])]}
     # return {"messages": [tools_llm_gpt.invoke(state["messages"])]}
 
 
@@ -56,7 +56,10 @@ graph_builder.add_conditional_edges("chatbot", tools_condition)
 graph_builder.add_edge("tools", "chatbot")
 graph_builder.set_entry_point("chatbot")
 
-simple_chat_graph = graph_builder.compile(checkpointer=memory)
+simple_chat_graph = graph_builder.compile(
+    checkpointer=memory,
+    # interrupt_before=["tools"],
+)
 simple_chat_graph.get_graph().draw_mermaid_png(
     output_file_path="assets/tool-chatbot/state_graph.png"
 )

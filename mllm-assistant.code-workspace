@@ -11,10 +11,6 @@
 		{
 			"name": "mllm-client",
 			"path": "mllm-client"
-		},
-		{
-			"name": "mllm-security",
-			"path": "mllm-security"
 		}
 	],
 	"settings": {
