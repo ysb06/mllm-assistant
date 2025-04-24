@@ -1,4 +1,8 @@
 /* style.scss */
+html, body {
+    margin: 0;
+    padding: 0;
+}
 
 /* 공통 ChatPage 스타일 */
 [data-component='ChatPage'] {
@@ -10,7 +14,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    margin: 16px; /* 페이지 바깥 여백 */
+    margin: 16px;
+    /* 페이지 바깥 여백 */
 
     &>div {
         flex-shrink: 0;
@@ -35,7 +40,8 @@
     main {
         flex: 1;
         display: flex;
-        overflow: hidden; /* 내부에서 스크롤 */
+        overflow: hidden;
+        /* 내부에서 스크롤 */
         margin: 8px 0;
 
         /* 채팅영역 */
@@ -43,13 +49,15 @@
             display: flex;
             flex-direction: column;
             flex: 2;
-            margin-right: 8px; 
-            overflow: hidden; /* 내부 ChatList가 스크롤 */
+            margin-right: 8px;
+            overflow: hidden;
+            /* 내부 ChatList가 스크롤 */
 
             [data-component='ChatList'] {
                 flex: 1;
                 overflow-y: auto;
-                scroll-behavior: smooth; /* 새로운 메시지 추가 시 부드러운 스크롤 */
+                scroll-behavior: smooth;
+                /* 새로운 메시지 추가 시 부드러운 스크롤 */
                 border: 1px solid #ccc;
                 border-radius: 4px;
                 padding: 8px;
@@ -95,12 +103,14 @@
                 display: flex;
                 flex-direction: column;
                 flex: 1;
-                min-height: 0; /* 자식이 스크롤하도록 */
-                
+                min-height: 0;
+                /* 자식이 스크롤하도록 */
+
                 .event-container {
                     flex: 1;
                     overflow-y: auto;
-                    scroll-behavior: smooth; /* 이벤트 추가 시 부드러운 스크롤 */
+                    scroll-behavior: smooth;
+                    /* 이벤트 추가 시 부드러운 스크롤 */
 
                     border: 1px solid #ccc;
                     border-radius: 4px;
@@ -125,7 +135,7 @@
             /* LangGraphImage (StateGraph 미리보기) */
             [data-component='LangGraphImage'] {
                 img {
-                    height: 150px; 
+                    height: 150px;
                     border-radius: 4px;
                     margin: auto;
                     display: block;
@@ -134,8 +144,10 @@
 
             /* 세션 관련 영역 (StateGraph와 Selector를 한 줄로) */
             .session {
-                display: flex;    /* 가로 배치 */
-                gap: 8px;         /* 사이 간격 */
+                display: flex;
+                /* 가로 배치 */
+                gap: 8px;
+                /* 사이 간격 */
                 margin-top: 8px;
                 max-height: 220px;
 
@@ -156,11 +168,13 @@
                     margin: 8px;
 
                     /* 세션 목록 스타일이 필요하다면 추가 */
-                    ul, li {
+                    ul,
+                    li {
                         list-style: none;
                         margin: 8px 0;
                         padding: 0;
                     }
+
                     li {
                         cursor: pointer;
                         margin-bottom: 4px;
@@ -182,7 +196,17 @@
 /* 채팅 입력 영역 (ChatInput) */
 [data-component='ChatInput'] {
     display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 8px;
+
+    /* 입력 영역과 버튼을 묶는 컨테이너 */
+    .input-actions {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
     textarea {
         flex: 1;
@@ -207,5 +231,73 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+    }
+
+    /* 음성 인식 컴포넌트 스타일 */
+    .speech-to-text {
+        display: flex;
+        align-items: center;
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            transition: all 0.3s ease;
+
+            &.recording {
+                background-color: #ff4a4a;
+                color: white;
+                animation: pulse 1.5s infinite;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            &:hover:not(:disabled) {
+                background-color: #e0e0e0;
+            }
+        }
+
+        .recording-indicator {
+            margin-left: 6px;
+            color: #ff4a4a;
+            animation: blink 1s infinite;
+        }
+    }
+}
+
+/* 음성 녹음 애니메이션 효과 */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
     }
 }

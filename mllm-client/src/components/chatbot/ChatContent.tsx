@@ -1,5 +1,7 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IEventElement, IChatElement } from '../../lib/langgraph';
+import { SpeechToText } from './SpeechToText';
+
 
 interface ChatListProps {
     messages: IChatElement[];
@@ -49,25 +51,32 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         }
     };
 
+    const handleSpeechTranscript = (transcript: string) => {
+        setInputText(transcript);
+    };
+
     return (
         <div data-component="ChatInput">
-            <textarea
-                value={inputText}
-                placeholder="Type your message..."
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={handleKeyPress}
-                disabled={disabled}
-            />
-            <button onClick={handleSend} disabled={disabled || inputText.trim() === ""}>
-                Send
-            </button>
+            <div className="input-actions">
+                <textarea
+                    value={inputText}
+                    placeholder="Type your message..."
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    disabled={disabled}
+                />
+                <SpeechToText onTranscript={handleSpeechTranscript} />
+                <button onClick={handleSend} disabled={disabled || inputText.trim() === ""}>
+                    Send
+                </button>
+            </div>
         </div>
     );
 }
 
 export async function sendChatMessage(
-    messages: IChatElement[], 
-    url: string, onStreamReceive: (content: IEventElement) => void, 
+    messages: IChatElement[],
+    url: string, onStreamReceive: (content: IEventElement) => void,
     session: string | null = null
 ) {
     const content: { messages: IChatElement[], session?: string } = {

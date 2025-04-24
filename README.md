@@ -18,9 +18,9 @@
     howpublished = {\url{https://github.com/sungyeonparkk/vision-assistant-for-driving}},
   }
 
-- [CML](https://proceedings.mlr.press/v202/ma23i.html)
+- [Calibrating Multimodal Learning (CML)](https://proceedings.mlr.press/v202/ma23i.html)
   + arXiv: https://arxiv.org/abs/2306.01265
   + GitHub: https://github.com/QingyangZhang/CML
   + Ma, H., Zhang, Q., Zhang, C., Wu, B., Fu, H., Zhou, J. T., & Hu, Q. (2023, July). Calibrating multimodal learning. In International Conference on Machine Learning (pp. 23429-23450). PMLR. 
-  
+
 - 나머지 Reference 작성 중
