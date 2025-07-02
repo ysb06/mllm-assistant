@@ -10,6 +10,13 @@
             "request": "launch",
             "module": "mllm_server",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Graph Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "petrillm",
+            "console": "integratedTerminal"
         }
     ]
 }

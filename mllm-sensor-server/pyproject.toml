@@ -15,6 +15,7 @@ dependencies = [
     "tavily-python>=0.5.0",
     "langchain-community>=0.3.14",
     "langgraph-checkpoint-sqlite>=2.0.1",
+    "opencv-python>=4.11.0.86",
     "pygraphviz>=1.14"
 ]
 requires-python = ">=3.11"

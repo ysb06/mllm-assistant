@@ -80,10 +80,15 @@ class ScanerFilterServer:
     def activate(self):
         logger.info("Activating SCANeR server (UDP Receiver)...")
 
-        self.filter_udp_socket.bind(self.filter_address)
-        self.is_active = True
-        self.filter_thread = threading.Thread(target=self._update_scaner_data)
-        self.filter_thread.start()
+        try:
+            self.filter_udp_socket.bind(self.filter_address)
+            self.filter_thread = threading.Thread(target=self._update_scaner_data)
+            self.filter_thread.start()
+            self.is_active = True
+        except OSError as e:
+            logger.error(f"May failed to bind UDP socket: {e}")
+            self.is_active = False
+            return
 
         logger.info("SCANeR server activated.")
 

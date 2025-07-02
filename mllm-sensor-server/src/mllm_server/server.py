@@ -6,13 +6,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.chatbot import chatbot_router
-
+from .routers.agent import agent_router
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 fastapi_app = FastAPI()
 fastapi_app.include_router(chatbot_router)
+fastapi_app.include_router(agent_router)
 
 origins = [
     "http://localhost",
