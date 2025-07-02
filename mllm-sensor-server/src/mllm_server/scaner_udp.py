@@ -6,7 +6,7 @@ import time
 from collections import deque
 from typing import Dict, List, Optional
 
-SERVER_IP = "192.168.1.6"
+SERVER_IP = "192.168.1.3"
 SERVER_PORT = 46012
 DATA_VALUE_SIZE = 8  # 64-bit double
 
@@ -35,6 +35,23 @@ class ScanerFilterServer:
         
         self.is_active = False
         self.filter_thread: Optional[threading.Thread] = None
+    
+    def _parse_scaner_data(self, values: tuple) -> Dict[int, float]:
+        results = {}
+        
+        # 값들을 2개씩 묶어서 처리 (key, value 쌍)
+        for i in range(0, len(values) - 1, 2):
+            key_value = values[i]
+            data_value = values[i + 1]
+            
+            # 무한대 값은 유효하지 않은 키로 간주하고 건너뛰기
+            if key_value in (float('inf'), float('-inf')):
+                continue
+                
+            key = int(key_value)
+            results[key] = data_value
+            
+        return results
 
     def _update_scaner_data(self) -> None:
         logger.info("Updating SCANeR data via UDP...")
@@ -44,24 +61,18 @@ class ScanerFilterServer:
                 data, _ = self.filter_udp_socket.recvfrom(self.buffer_size)
                 # '<' : little-endian, "d" : 64-bit double
                 values = struct.unpack("<" + "d" * (len(data) // self.data_size), data)
-                results = {}
-                key = -1
-                for idx, value in enumerate(values):
-                    if idx % 2 == 0:
-                        if value == float("inf") or value == float("-inf"):
-                            key = -1
-                        else:
-                            key = int(value)
-                    else:
-                        if key == -1:
-                            continue
-                        results[key] = value
+                
+                results = self._parse_scaner_data(values)
                 self._process_scaner_data(results)
 
                 # logger.info(f"SCANeR data received: {results}")
                 if not data_received:
                     data_received = True
                     logger.info(f"SCANeR is running...")
+            except KeyboardInterrupt:
+                logger.info("KeyboardInterrupt received, stopping SCANeR data update...")
+                self.is_active = False
+                break
             except socket.timeout:
                 logger.info(f"(Timeout) Waiting for messages from SCANeR...")
                 data_received = False
@@ -71,11 +82,11 @@ class ScanerFilterServer:
                 break
 
     def _process_scaner_data(self, data: Dict[int, float]) -> None:
-        if 167 not in data or 120 not in data:
-            return
-        # 167: Steering Angle, 120: Speed
-        self._scaner_steering_angles.append(data[167])
-        self._scaner_speeds.append(data[120])
+        if 167 in data:
+            self._scaner_steering_angles.append(data[167])
+
+        if 120 in data:
+            self._scaner_speeds.append(data[120])
 
     def activate(self):
         logger.info("Activating SCANeR server (UDP Receiver)...")
@@ -89,8 +100,6 @@ class ScanerFilterServer:
             logger.error(f"May failed to bind UDP socket: {e}")
             self.is_active = False
             return
-
-        logger.info("SCANeR server activated.")
 
     def deactivate(self):
         logger.info("Deactivating SCANeR server...")

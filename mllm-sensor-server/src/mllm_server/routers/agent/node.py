@@ -80,6 +80,7 @@ def node_llama_chatbot(state: State):
                 logger.warning("Visual context already exists in the query.")
     
     # Update the query content
+    logger.info(f"User query content:\r\n {user_query_content[0]}")
     query[-1].content = user_query_content
     
     result = llm_llama.invoke(query)
