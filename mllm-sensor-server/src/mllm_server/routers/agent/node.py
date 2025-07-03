@@ -3,6 +3,7 @@ import logging
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
@@ -26,7 +27,8 @@ class CodeOutput(BaseModel):
 sensor_server = ScanerFilterServer()
 sensor_server.activate()
 
-llm_llama = ChatOllama(model="llama3.1")
+# llm_llama = ChatOllama(model="llama3.1")
+llm_llama = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
 llm_llama_code_structured = llm_llama.with_structured_output(
     CodeOutput, include_raw=True
 )
@@ -37,52 +39,28 @@ def node_find_next_action(state: State):
     current_user_query: HumanMessage = query[-1]
     user_query_message: str = current_user_query.content
     result = llm_llama_code_structured.invoke(user_query_message)
-    print(result)
 
 
 def node_llama_chatbot(state: State):
     query: List[BaseMessage] = state["messages"]
-    user_query: HumanMessage = state["messages"][-1]
-    user_query_content = user_query.content
-    
-    # Handle sensor contexts - append to text content
-    if "sensor_contexts" in state and state["sensor_contexts"]:
-        if isinstance(user_query_content, str):
-            user_query_content += "-" * 10 + "\r\n"
-            for key, value in state["sensor_contexts"].items():
-                user_query_content += f"{key}: {value}\r\n"
-        else:
-            # If content is already a list, find text content and append
-            for content_item in user_query_content:
-                if content_item.get("type") == "text":
-                    content_item["text"] += "-" * 10 + "\r\n"
-                    for key, value in state["sensor_contexts"].items():
-                        content_item["text"] += f"{key}: {value}\r\n"
-                    break
-    
-    # Handle visual contexts - convert to multimodal format if needed
-    if "visual_contexts" in state and state["visual_contexts"]:
-        if isinstance(user_query_content, str):
-            # Convert string to multimodal format
-            user_query_content = [
-                {
-                    "type": "text",
-                    "text": user_query_content,
-                },
-                state["visual_contexts"]
-            ]
-        else:
-            # Check if image already exists
-            has_image = any(content.get("type") == "image" for content in user_query_content)
-            if not has_image:
-                user_query_content.append(state["visual_contexts"])
-            else:
-                logger.warning("Visual context already exists in the query.")
-    
-    # Update the query content
-    logger.info(f"User query content:\r\n {user_query_content[0]}")
-    query[-1].content = user_query_content
-    
+    current_query: HumanMessage = state["messages"][-1]
+    current_query_text: str = current_query.content
+
+    if "sensor_contexts" in state:
+        current_query_text += "-" * 10 + "\r\n"
+        for key, value in state["sensor_contexts"].items():
+            current_query_text += f"{key}: {value}\r\n"
+
+    current_query = HumanMessage(
+        content=[{
+            "type": "text",
+            "text": current_query_text,
+        }],
+    )
+    if "visual_contexts" in state:
+        current_query.content.append(state["visual_contexts"])
+
+    query[-1] = current_query
     result = llm_llama.invoke(query)
     return {"messages": [result]}
 
@@ -101,10 +79,8 @@ def node_vehicle_context_fetch(state: State):
 def node_webcam_context_fetch(state: State):
     base64_jpg = capture_webcam_image().decode("utf-8")
     state["visual_contexts"] = {
-        "type": "image",
-        "source_type": "base64",
-        "data": base64_jpg,
-        "mime_type": "image/jpeg",
+        "type": "image_url",
+        "image_url": f"data:image/jpeg;base64,{base64_jpg}",  # Data URI 형식 사용
     }
     return state
 

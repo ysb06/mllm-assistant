@@ -16,7 +16,10 @@ dependencies = [
     "langchain-community>=0.3.14",
     "langgraph-checkpoint-sqlite>=2.0.1",
     "opencv-python>=4.11.0.86",
-    "pygraphviz>=1.14"
+    "pygraphviz>=1.14",
+    "langchain-google-genai>=2.1.6",
+    "grpcio>=1.73.1",
+    "grpcio-tools>=1.73.1"
 ]
 requires-python = ">=3.11"
 readme = "README.md"
