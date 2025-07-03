@@ -1,8 +1,12 @@
 import cv2
 import base64
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 웹캠 캡처 객체 생성
 cap = cv2.VideoCapture(0)
+logger.info("Webcam initialized")
 
 def capture_webcam_image():
     # 프레임 읽기

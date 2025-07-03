@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 from typing import Dict
 
 from dotenv import load_dotenv
@@ -6,12 +7,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.agent import agent_router
+from .routers.agent.node import sensor_server
+from .webcam import cap
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    cap.release()
+    sensor_server.deactivate()
+    logger.info("Webcam and sensor server resources released")
+
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-fastapi_app = FastAPI()
-# fastapi_app.include_router(chatbot_router)
+fastapi_app = FastAPI(lifespan=lifespan)
 fastapi_app.include_router(agent_router)
 
 origins = [
@@ -26,8 +38,6 @@ fastapi_app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# llm_gpt4omini = ChatOpenAI(model="gpt-4o-mini")
 
 
 @fastapi_app.get("/")

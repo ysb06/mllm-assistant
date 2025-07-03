@@ -26,6 +26,7 @@ class CodeOutput(BaseModel):
 
 sensor_server = ScanerFilterServer()
 sensor_server.activate()
+logger.info("Sensor server activated")
 
 # llm_llama = ChatOllama(model="llama3.1")
 llm_llama = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
