@@ -1,3 +1,6 @@
-[submodule "vision-assistant-for-driving"]
-	path = vision-assistant-for-driving
+[submodule "third_party/vision-assistant-for-driving"]
+	path = third_party/vision-assistant-for-driving
 	url = https://github.com/sungyeonparkk/vision-assistant-for-driving
+[submodule "third_party/alfworld"]
+	path = third_party/alfworld
+	url = https://github.com/alfworld/alfworld

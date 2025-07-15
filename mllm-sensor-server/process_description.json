@@ -1,0 +1,230 @@
+{
+    "elements": [
+        {
+            "self": 1,
+            "type": "Activity",
+            "name": {
+                "en": "Customer Accesses Online Shopping Mall",
+                "de": ""
+            }
+        },
+        {
+            "self": 2,
+            "type": "Activity",
+            "name": {
+                "en": "Select Products",
+                "de": ""
+            }
+        },
+        {
+            "self": 3,
+            "type": "Activity",
+            "name": {
+                "en": "Desired Products Selected",
+                "de": ""
+            }
+        },
+        {
+            "self": 4,
+            "type": "Activity",
+            "name": {
+                "en": "Add to Shopping Cart",
+                "de": ""
+            }
+        },
+        {
+            "self": 5,
+            "type": "Activity",
+            "name": {
+                "en": "Enter Payment Info",
+                "de": ""
+            }
+        },
+        {
+            "self": 6,
+            "type": "Activity",
+            "name": {
+                "en": "Proceed with Packaging and Shipping",
+                "de": ""
+            }
+        },
+        {
+            "self": 7,
+            "type": "Activity",
+            "name": {
+                "en": "Prompt Re-entry of Payment Details",
+                "de": ""
+            }
+        },
+        {
+            "self": 8,
+            "type": "Object Store",
+            "name": {
+                "en": "Customer Accesses Online Shopping Mall",
+                "de": ""
+            }
+        },
+        {
+            "self": 9,
+            "type": "Object Store",
+            "name": {
+                "en": "Desired Products Selected",
+                "de": ""
+            }
+        },
+        {
+            "self": 10,
+            "type": "Object Store",
+            "name": {
+                "en": "Add to Shopping Cart",
+                "de": ""
+            }
+        },
+        {
+            "self": 11,
+            "type": "Object Store",
+            "name": {
+                "en": "Enter Payment Info",
+                "de": ""
+            }
+        },
+        {
+            "self": 12,
+            "type": "Object Store",
+            "name": {
+                "en": "Payment Information Entered",
+                "de": ""
+            }
+        },
+        {
+            "self": 13,
+            "type": "Object Store",
+            "name": {
+                "en": "Payment Entered",
+                "de": ""
+            }
+        },
+        {
+            "self": 14,
+            "type": "Object Store",
+            "name": {
+                "en": "Payment Validation Checks",
+                "de": ""
+            }
+        },
+        {
+            "self": 15,
+            "type": "Object Store",
+            "name": {
+                "en": "Order Completed",
+                "de": ""
+            }
+        },
+        {
+            "self": 16,
+            "type": "Object Store",
+            "name": {
+                "en": "Payment Entered",
+                "de": ""
+            }
+        },
+        {
+            "self": 17,
+            "type": "Object Store",
+            "name": {
+                "en": "Order Accepted",
+                "de": ""
+            }
+        },
+        {
+            "self": 18,
+            "type": "Object Store",
+            "name": {
+                "en": "Products Added to Shopping Cart",
+                "de": ""
+            }
+        },
+        {
+            "self": 19,
+            "type": "Object Store",
+            "name": {
+                "en": "Payment Information Entered",
+                "de": ""
+            }
+        }
+    ],
+    "edges": [
+        {
+            "from": 8,
+            "to": 2
+        },
+        {
+            "from": 2,
+            "to": 3
+        },
+        {
+            "from": 3,
+            "to": 4
+        },
+        {
+            "from": 3,
+            "to": 5
+        },
+        {
+            "from": 4,
+            "to": 9
+        },
+        {
+            "from": 5,
+            "to": 11
+        },
+        {
+            "from": 11,
+            "to": 13
+        },
+        {
+            "from": 13,
+            "to": 14
+        },
+        {
+            "from": 14,
+            "to": 17
+        },
+        {
+            "from": 4,
+            "to": 18
+        },
+        {
+            "from": 5,
+            "to": 19
+        },
+        {
+            "from": 19,
+            "to": 13
+        },
+        {
+            "from": 14,
+            "to": 17
+        },
+        {
+            "from": 6,
+            "to": 15
+        },
+        {
+            "from": 17,
+            "to": 6
+        },
+        {
+            "from": 14,
+            "to": 16
+        },
+        {
+            "from": 5,
+            "to": 7
+        },
+        {
+            "from": 7,
+            "to": 13
+        }
+    ]
+}
