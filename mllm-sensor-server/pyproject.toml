@@ -19,7 +19,7 @@ dependencies = [
     "pygraphviz>=1.14",
     "langchain-google-genai>=2.1.6",
     "grpcio>=1.73.1",
-    "grpcio-tools>=1.73.1"
+    "grpcio-tools>=1.73.1",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -31,3 +31,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.pdm]
 distribution = true
+
