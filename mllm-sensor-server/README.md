@@ -4,7 +4,13 @@
 
 ## Installation and start up
 
-1. If you are using PDM,
+1. Install [GraphViz](https://graphviz.org/download/)
+    ```bash
+    sudo apt install graphviz graphviz-dev
+    ```
+2. (Windows) Install [C++ Build Tools](https://visualstudio.microsoft.com/ko/visual-cpp-build-tools/)
+
+3. If you are using PDM,
 
     ```bash
     pdm install
@@ -12,17 +18,18 @@
     or using pip
 
     ```bash
-    pdm install
+    pip install .
     ```
 
-2. Install [Ollama](https://ollama.com/download)
-3. Pull ollama model
+4. Install [Ollama](https://ollama.com/download)
+
+5. Pull ollama model
     ```bash
     ollama pull llama3.1:8b
     ```
-4. Install [GraphViz](https://graphviz.org/download/)
-5. (Windows) Install [C++ Build Tools](https://visualstudio.microsoft.com/ko/visual-cpp-build-tools/)
-
+    ```bash
+    ollama pull gpt-oss:20b
+    ```
 
 ## How to start
 
