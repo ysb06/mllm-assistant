@@ -7,7 +7,8 @@ from fastapi.responses import FileResponse, StreamingResponse
 
 from ...types import AssistantMessage, ChatRequest, UserMessage
 from ...utils import convert_serializable
-from . import GRAPH_IMAGE_PATH, ROUTER_NAME, chat_graph, memory
+from . import GRAPH_IMAGE_PATH, ROUTER_NAME
+from .model.oss_gpt.graph import chat_graph, memory
 
 logger = logging.getLogger(__name__)
 agent_router = APIRouter(prefix=f"/{ROUTER_NAME}", tags=[f"{ROUTER_NAME}"])

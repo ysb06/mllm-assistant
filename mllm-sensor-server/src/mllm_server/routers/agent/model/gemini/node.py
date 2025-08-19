@@ -7,9 +7,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
-from . import State
-from ...scaner_udp import ScanerFilterServer
-from ...webcam import capture_webcam_image
+from .state import State
+from .....scaner_udp import ScanerFilterServer
+from .....webcam import capture_webcam_image
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +28,7 @@ sensor_server = ScanerFilterServer()
 sensor_server.activate()
 logger.info("Sensor server activated")
 
-llm_llama = ChatOllama(model="gpt-oss:20b")
-# llm_llama = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
-
+llm_llama = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
 llm_llama_code_structured = llm_llama.with_structured_output(
     CodeOutput, include_raw=True
 )

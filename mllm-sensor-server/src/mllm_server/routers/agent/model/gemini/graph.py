@@ -2,7 +2,8 @@ import aiosqlite
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import END, START, StateGraph
 
-from . import CHECKPOINT_DATA_PATH, GRAPH_IMAGE_PATH, State
+from ... import CHECKPOINT_DATA_PATH, GRAPH_IMAGE_PATH
+from .state import State
 from .node import (
     node_llama_chatbot,
     node_vehicle_context_fetch,

@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers.agent import agent_router
-from .routers.agent.node import sensor_server
+from .routers.agent.router import agent_router
+from .routers.agent.model.oss_gpt.node import sensor_server
 from .webcam import cap
 
 logger = logging.getLogger(__name__)
