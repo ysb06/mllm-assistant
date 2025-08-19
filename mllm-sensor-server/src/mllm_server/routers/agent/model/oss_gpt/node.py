@@ -1,7 +1,7 @@
 from typing import Annotated, Dict, List, TypedDict
 import logging
 
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph.message import add_messages
@@ -44,7 +44,7 @@ def node_fetch_webcam_context(state: State):
 
 def node_extract_image_context(state: State):
     raw_image_context = state.get("raw_image_context", None)
-    prompt_text = f"다음 이미지는 운전 중 차량 전면을 촬영한 사진입니다. 이미지에서 보이는 도로 상황, 장애물, 교통 상황 등 운전 상황들을 자세히 설명해주세요."
+    prompt_text = f"다음 이미지는 운전 시뮬레이터에서 운전 중 차량 전면을 촬영한 사진입니다. 실제 운전상황이라고 생각하고 분석해 주세요. 이미지에서 보이는 도로 상황, 장애물, 교통 상황 등 운전 상황들을 자세히 설명해주세요."
 
     # 멀티모달 메시지 구성
     if raw_image_context:
@@ -57,8 +57,10 @@ def node_extract_image_context(state: State):
     else:
         message = HumanMessage(content=prompt_text)
 
+    logger.info("Extracting visual context from image...")
     response = vision_encoder.invoke([message])
     visual_context = response.content if hasattr(response, "content") else str(response)
+    logger.info(f"Visual context extracted")
 
     return {"visual_context": visual_context}
 
@@ -80,9 +82,16 @@ def node_run_chatbot(state: State):
             "text": current_query_text,
         }],
     )
+
+    extra_prompt = "답변은 한국어로 그리고 3문장 이내로 해주세요"
+    system_msg = SystemMessage(content=extra_prompt)
     
     query[-1] = current_query
+    query = [system_msg] + query  # SystemMessage를 맨 앞에 추가
+    logger.info(f"Current query text:\r\n{current_query_text}")
     result = gpt_oss.invoke(query)
+    logger.info(f"Chatbot responsed")
+
     return {"messages": [result]}
 
 def _convert_sensor_context(sensor_context: Dict[str, str]) -> str:
