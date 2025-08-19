@@ -68,7 +68,7 @@ def node_extract_image_context(state: State):
 def node_run_chatbot(state: State):
     query: List[BaseMessage] = state["messages"]
     current_query: HumanMessage = state["messages"][-1]
-    current_query_text: str = current_query.content
+    current_query_text: str = current_query.content + "\r\n"
 
     if "sensor_context" in state:
         current_query_text += _convert_sensor_context(state["sensor_context"])
