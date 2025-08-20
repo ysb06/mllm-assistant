@@ -13,6 +13,9 @@ from .....webcam import capture_webcam_image
 
 logger = logging.getLogger(__name__)
 
+SYSTEM_PROMPT = "답변은 한국어로 그리고 3문장 이내로 해주세요"
+IMAGE_EXTRACTION_PROMPT = "다음 이미지는 운전 시뮬레이터에서 운전 중 차량 전면을 촬영한 사진입니다. 실제 운전상황이라고 생각하고 분석해 주세요. 이미지에서 보이는 도로 상황, 장애물, 교통 상황 등 운전 상황들을 자세히 설명해주세요."
+
 sensor_server = ScanerFilterServer()
 sensor_server.activate()
 logger.info("Sensor server activated")
@@ -44,18 +47,17 @@ def node_fetch_webcam_context(state: State):
 
 def node_extract_image_context(state: State):
     raw_image_context = state.get("raw_image_context", None)
-    prompt_text = f"다음 이미지는 운전 시뮬레이터에서 운전 중 차량 전면을 촬영한 사진입니다. 실제 운전상황이라고 생각하고 분석해 주세요. 이미지에서 보이는 도로 상황, 장애물, 교통 상황 등 운전 상황들을 자세히 설명해주세요."
 
     # 멀티모달 메시지 구성
     if raw_image_context:
         message = HumanMessage(
             content=[
-                {"type": "text", "text": prompt_text},
+                {"type": "text", "text": IMAGE_EXTRACTION_PROMPT},
                 raw_image_context,  # 이미 올바른 형식으로 되어 있음
             ]
         )
     else:
-        message = HumanMessage(content=prompt_text)
+        message = HumanMessage(content=IMAGE_EXTRACTION_PROMPT)
 
     logger.info("Extracting visual context from image...")
     response = vision_encoder.invoke([message])
@@ -83,9 +85,8 @@ def node_run_chatbot(state: State):
         }],
     )
 
-    extra_prompt = "답변은 한국어로 그리고 3문장 이내로 해주세요"
-    system_msg = SystemMessage(content=extra_prompt)
-    
+    system_msg = SystemMessage(content=SYSTEM_PROMPT)
+
     query[-1] = current_query
     query = [system_msg] + query  # SystemMessage를 맨 앞에 추가
     logger.info(f"Current query text:\r\n{current_query_text}")
