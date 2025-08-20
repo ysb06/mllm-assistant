@@ -1,9 +1,10 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IEventElement, IChatElement } from '../../lib/langgraph';
-import { ChatList, sendChatMessage } from '../../components/chatbot/ChatContent';
+import { ChatList } from '../../components/chatbot/ChatContent';
 import { StateGraph, EventList } from '../../components/chatbot/LangGraph';
 import { SpeechToText } from '../../components/chatbot/SpeechToText';
 import { Selector } from '../AdvancedChat/Session';
+import { useChatStreaming } from '../../hooks/useChatStreaming';
 import { v4 as uuidv4 } from 'uuid';
 
 import './SpeakChat.scss';
@@ -81,14 +82,23 @@ function VoiceButton({ onSpeechResult, disabled }: VoiceButtonProps) {
 }
 
 export function SpeakChat() {
-    const [messages, setMessages] = useState<IChatElement[]>([
-        { role: "system", content: "You are very helpful assistant" }
-    ]);
-    const [events, setEvents] = useState<IEventElement[]>([]);
     const [sessionList, setSessionList] = useState<string[]>([]);
     const [session, setSession] = useState<string>(uuidv4());
     const [activeTab, setActiveTab] = useState<string>('events');
-    const [isSending, setIsSending] = useState<boolean>(false);
+
+    const [state, actions] = useChatStreaming(
+        [{ role: "system", content: "You are very helpful assistant" }],
+        {
+            serverUrl: SERVER_URL,
+            session: session,
+            onEventReceived: (event) => {
+                console.log('Event received:', event);
+            }
+        }
+    );
+
+    const { messages, events, isStreaming } = state;
+    const { sendMessage } = actions;
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -113,35 +123,12 @@ export function SpeakChat() {
     }, []);
 
     const handleSpeechResult = async (transcript: string) => {
-        if (isSending) return; // 이미 전송 중이면 무시
+        if (isStreaming) return; // 이미 전송 중이면 무시
         
-        setIsSending(true);
-        
-        let newMessages = [
-            ...messages,
-            { role: "user", content: transcript },
-            { role: "assistant", content: "" }
-        ];
-        setMessages(newMessages);
-
         try {
-            await sendChatMessage(newMessages, SERVER_URL, (event: any) => {
-                setEvents((prevEvents) => [...prevEvents, event]);
-                if (event.event === "on_chat_model_stream") {
-                    setMessages((prevMessages) => {
-                        const lastAssistantMessage = prevMessages[prevMessages.length - 1];
-                        const newMessages = prevMessages.slice(0, prevMessages.length - 1);
-                        return [
-                            ...newMessages,
-                            { role: "assistant", content: lastAssistantMessage.content + event.data.chunk.content }
-                        ];
-                    });
-                }
-            }, session);
+            await sendMessage(transcript);
         } catch (error) {
-            console.error("Error sending message:", error);
-        } finally {
-            setIsSending(false);
+            console.error("Error sending speech message:", error);
         }
     };
 
@@ -159,7 +146,7 @@ export function SpeakChat() {
                     <div className="chat-messages">
                         <ChatList messages={messages} />
                     </div>
-                    <VoiceButton onSpeechResult={handleSpeechResult} disabled={isSending} />
+                    <VoiceButton onSpeechResult={handleSpeechResult} disabled={isStreaming} />
                 </div>
                 <SidebarTabs 
                     activeTab={activeTab}

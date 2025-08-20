@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StateGraph, EventList } from '../../components/chatbot/LangGraph';
 import { IEventElement, IChatElement } from '../../lib/langgraph';
-import { ChatList, ChatInput, sendChatMessage } from '../../components/chatbot/ChatContent';
+import { ChatList, ChatInput } from '../../components/chatbot/ChatContent';
+import { useChatStreaming } from '../../hooks/useChatStreaming';
 
 import './style.scss';
 import { Selector } from './Session';
@@ -24,13 +25,22 @@ function PageTitle({ title }: IPageTitleProps) {
 }
 
 export function AdvancedChat() {
-    // const startTimeRef = useRef<string>(new Date().toISOString());
-    const [messages, setMessages] = useState<IChatElement[]>([
-        { role: "system", content: "You are very helpful assistant" }
-    ]);
-    const [events, setEvents] = useState<IEventElement[]>([]);
     const [sessionList, setSessionList] = useState<string[]>([]);
     const [session, setSession] = useState<string>(uuidv4());
+
+    const [state, actions] = useChatStreaming(
+        [{ role: "system", content: "You are very helpful assistant" }],
+        {
+            serverUrl: SERVER_URL,
+            session: session,
+            onEventReceived: (event) => {
+                console.log('Event received:', event);
+            }
+        }
+    );
+
+    const { messages, events, isStreaming } = state;
+    const { sendMessage } = actions;
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -55,26 +65,11 @@ export function AdvancedChat() {
     }, []); // 빈 배열을 넣어 한 번만 실행되도록
 
     const handleSend = async (message: string) => {
-        let newMessages = [
-            ...messages,
-            { role: "user", content: message },
-            { role: "assistant", content: "" }
-        ];
-        setMessages(newMessages);
-
-        await sendChatMessage(newMessages, SERVER_URL, (event: any) => {
-            setEvents((prevEvents) => [...prevEvents, event]);
-            if (event.event === "on_chat_model_stream") {
-                setMessages((prevMessages) => {
-                    const lastAssistantMessage = prevMessages[prevMessages.length - 1];
-                    const newMessages = prevMessages.slice(0, prevMessages.length - 1);
-                    return [
-                        ...newMessages,
-                        { role: "assistant", content: lastAssistantMessage.content + event.data.chunk.content }
-                    ];
-                });
-            }
-        }, session);
+        try {
+            await sendMessage(message);
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
     };
 
     const handleSessionSelectorChange = (newSession: string) => {
@@ -89,7 +84,7 @@ export function AdvancedChat() {
             <main>
                 <div className="chat-content">
                     <ChatList messages={messages} />
-                    <ChatInput onSend={handleSend} disabled={false} />
+                    <ChatInput onSend={handleSend} disabled={isStreaming} />
                 </div>
                 <div className="chat-sidebar">
                     <EventList events={events} />
