@@ -5,9 +5,10 @@ import { SpeechToText } from './SpeechToText';
 
 interface ChatListProps {
     messages: IChatElement[];
+    nodeName?: string;
 }
 
-export function ChatList({ messages }: ChatListProps) {
+export function ChatList({ messages, nodeName}: ChatListProps) {
     const listRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -20,8 +21,15 @@ export function ChatList({ messages }: ChatListProps) {
         <div ref={listRef} data-component="ChatList">
             {messages.map((message, i) => {
                 return (
-                    <div className={message.role} key={i}>
-                        {message.content}
+                    <div key={i}>
+                        {message.role === "assistant" && (
+                            <div className="message-label">
+                                Assistant {i === messages.length - 1 && nodeName ? `<${nodeName}>` : ""}
+                            </div>
+                        )}
+                        <div className={message.role}>
+                            {message.content}
+                        </div>
                     </div>
                 );
             })}

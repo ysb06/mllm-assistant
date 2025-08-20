@@ -83,7 +83,10 @@ export function AdvancedChat() {
             </header>
             <main>
                 <div className="chat-content">
-                    <ChatList messages={messages} />
+                    <ChatList
+                        messages={messages}
+                        nodeName={events.length ? events[events.length - 1]?.metadata.langgraph_node : undefined}
+                    />
                     <ChatInput onSend={handleSend} disabled={isStreaming} />
                 </div>
                 <div className="chat-sidebar">

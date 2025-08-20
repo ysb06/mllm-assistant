@@ -31,7 +31,7 @@ export function useChatStreaming(
     const [events, setEvents] = useState<IEventElement[]>([]);
     const [isStreaming, setIsStreaming] = useState<boolean>(false);
     const [error, setError] = useState<Error | null>(null);
-    
+
     const abortControllerRef = useRef<AbortController | null>(null);
 
     const sendMessage = useCallback(async (content: string) => {
@@ -66,26 +66,32 @@ export function useChatStreaming(
                     onEvent: (event: IEventElement) => {
                         // 이벤트를 이벤트 리스트에 추가
                         setEvents(prevEvents => [...prevEvents, event]);
-                        
+
                         // 외부 콜백 호출
                         options.onEventReceived?.(event);
 
                         // 스트리밍 메시지 처리
                         if (event.event === "on_chat_model_stream") {
-                            setMessages(prevMessages => {
-                                const lastAssistantMessage = prevMessages[prevMessages.length - 1];
-                                if (lastAssistantMessage.role === "assistant") {
-                                    const updatedMessages = prevMessages.slice(0, prevMessages.length - 1);
-                                    return [
-                                        ...updatedMessages,
-                                        {
-                                            role: "assistant",
-                                            content: lastAssistantMessage.content + event.data.chunk.content
+                            switch (event.metadata.langgraph_node) {
+                                case "node_run_chatbot":
+                                    setMessages(prevMessages => {
+                                        const lastAssistantMessage = prevMessages[prevMessages.length - 1];
+                                        if (lastAssistantMessage.role === "assistant") {
+                                            const updatedMessages = prevMessages.slice(0, prevMessages.length - 1);
+                                            return [
+                                                ...updatedMessages,
+                                                {
+                                                    role: "assistant",
+                                                    content: lastAssistantMessage.content + event.data.chunk.content
+                                                }
+                                            ];
                                         }
-                                    ];
-                                }
-                                return prevMessages;
-                            });
+                                        return prevMessages;
+                                    });
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     },
                     onError: (streamError: Error) => {

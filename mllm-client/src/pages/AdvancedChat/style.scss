@@ -64,12 +64,22 @@ html, body {
                 margin-bottom: 8px;
                 box-sizing: border-box;
 
+                /* 메시지 라벨 스타일 */
+                .message-label {
+                    font-size: 10px;
+                    color: #666;
+                    margin-bottom: 2px;
+                    font-weight: bold;
+                    background: none !important;
+                    padding: 0 !important;
+                }
+
                 /* 각 메시지 스타일 */
                 div {
                     margin-bottom: 6px;
                     padding: 4px 8px;
                     border-radius: 4px;
-                    background-color: #f7f7f7;
+                    // background-color: #f7f7f7;
 
                     &.user {
                         background-color: #e4f0e2;
